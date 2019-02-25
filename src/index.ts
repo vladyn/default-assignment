@@ -12,12 +12,32 @@ import 'material-design-lite';
 // -------------------------
 import { createClient } from '../lib/websocketConnector';
 
+/*
+* Game playground imports
+ */
+
+import clickNDrop from './click-n-drop';
+import turnService from './turn-service';
+import whoIsTheWinner from './whoIsTheWinner';
+
 // 2) Create a client object
 // -------------------------
 // This will not create a WS connection, but will only
 // return an object that controls the opening and closing
 // of the connection.
 const client = createClient('localhost', 4000);
+
+// Game playground inititalizers and events
+const cols = document.querySelectorAll('div.board-col');
+
+cols.forEach((col, index) => col.addEventListener('click', (evt: any) => {
+  const player: string = turnService();
+  const evtElement = evt.srcElement || evt.target;
+  clickNDrop(evtElement, player);
+  if (evtElement.classList.contains('board-col')) {
+    whoIsTheWinner(player, index);
+  }
+}));
 
 // 3) At a later point in the implementation we can use the
 // -------------------------
