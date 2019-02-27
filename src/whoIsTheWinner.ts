@@ -1,9 +1,10 @@
 const drops: Object = {};
 let counter: number = 1;
 
-function whoIsTheWinner(player: string, index: number) {
+function whoIsTheWinner(player: string, index: number): void {
   const currentStack = drops['col' + index] = drops['col' + index] || [];
   counter = 1;
+
   // Fill the Array with span from selected column
   currentStack.push(player);
 
@@ -12,38 +13,52 @@ function whoIsTheWinner(player: string, index: number) {
       .then(result => console.info(`%c ${result}`, 'background: #222; color: #bada55'))
       .catch((result) => {
         console.log(`traverse vertical reject with: ${result}`);
-        traverseHorizontalBackward(currentStack, index)
+        traverseScorpions(currentStack, index)
             .then((result) => {
-              console.info(`%c ${result} within direction left`,
+              console.info(`%c ${result} within direction left 🦂`,
                   'background: #222; color: #bada55; padding: 2px');
-              return traverseHorizontalForward(currentStack, index);
+              return traverseSnakes(currentStack, index);
+            }, (winner) => {
+              console.log(`%c ${winner} Scorpions 🦂 WIN`,
+                'background: #126349; color: #bada55; padding: 2px; font-size: 16px');
             })
             .then((result) => {
-              console.info(`%c ${result} within direction right`,
+              console.info(`%c ${result} within direction right 🐍`,
                   'background: #222; color: #bada55; padding: 2px');
               counter = 1;
-
               return traverseBullLeft(currentStack, index);
+            }, (winner) => {
+              console.log(`%c ${winner} Snakes 🐍 WIN`,
+                'background: #126349; color: #bada55; padding: 2px; font-size: 16px');
             })
             .then((result) => {
-              console.info(`%c ${result} within Bulls left`,
+              console.info(`%c ${result} within 🐂 Bulls left`,
                   'background: #222; color: #bada55; padding: 2px');
               return traverseBullRight(currentStack, index);
+            }, (winner) => {
+              console.info(`%c ${winner} 🐂 Bulls left WIN`,
+                'background: #efefef; color: #bada55; padding: 2px; font-size: 16px');
             })
             .then((result) => {
-              console.info(`%c ${result} within Bulls right`,
+              console.info(`%c ${result} within 🐂 Bulls right`,
                   'background: #222; color: #bada55; padding: 2px');
               counter = 1;
               return traverseBearLeft(currentStack, index);
+            }, (winner) => {
+              console.log(`%c ${winner} Bear 🐻 left WIN`,
+                'background: #126349; color: #bada55; padding: 2px; font-size: 16px');
             })
             .then((result) => {
-              console.info(`%c ${result} within Bear left`,
-                  'background: #222; color: #bada55; padding: 2px');
+              console.info(`%c ${result} within 🐻 Bear left`,
+                  'background: #cc6a74; color: #faf6e1; padding: 2px');
               return traverseBearRight(currentStack, index);
+            }, (winner) => {
+              console.log(`%c ${winner} Bear 🐻 right WIN`,
+                'background: #126349; color: #bada55; padding: 2px; font-size: 16px');
             })
             .then((result) => {
-              console.info(`%c ${result} within Bear right`,
-                  'background: #222; color: #bada55; padding: 2px');
+              console.info(`%c ${result} within 🐻 Bear right`,
+                  'background: #cc6a74; color: #faf6e1; padding: 2px');
             });
       });
 }
@@ -66,7 +81,7 @@ const traverseBears = (currentArray: [], index: number, direction: 'left' | 'rig
     let i = index;
     let nextArray;
     let nextArrEl;
-    let d = direction === 'left' ? 1 : -1;
+    let d = direction === 'left' ? -1 : 1;
     const currEl = [...currentArray].pop();
     while (direction === 'left' ? i >= 0 : i <= 6) {
       console.log(`i is ${i}`);
@@ -153,17 +168,18 @@ const traverseVertical = (currentArray) => {
 };
 
 // TODO: try to refactor this and combine it with the Forward traverse
-const traverseHorizontalBackward = (currentArray: [], index: number) => {
-  return traverseOceans(currentArray, index, 'left');
+const traverseScorpions = (currentArray: [], index: number) => {
+  return traverseEarth(currentArray, index, 'left');
 };
 
 // TODO: try to refactor this and combine it with the Backward traverse
-const traverseHorizontalForward = (currentArray: [], index: number) => {
-  return traverseOceans(currentArray, index, 'right');
+const traverseSnakes = (currentArray: [], index: number) => {
+  return traverseEarth(currentArray, index, 'right');
 };
 
-const traverseOceans = (currentArray: [], index: number, direction: 'left' | 'right') => {
+const traverseEarth = (currentArray: [], index: number, direction: 'left' | 'right') => {
   return new Promise((resolve, reject) => {
+    if (counter === 4) reject(new Error(`We have a winner on ${direction} with a ${counter}`));
     let i = index;
     let nextArray;
     let nextArrEl;
