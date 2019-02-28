@@ -27,7 +27,7 @@ import whoIsTheWinner from './whoIsTheWinner';
 // of the connection.
 const client = createClient('localhost', 4000);
 
-// Game playground inititalizers and events
+// Game playground initializers and events
 const cols = document.querySelectorAll('div.board-col');
 
 cols.forEach((col, index) => col.addEventListener('click', (evt: any) => {

@@ -1,5 +1,6 @@
 const drops: Object = {};
 let counter: number = 1;
+const cols = document.querySelectorAll('div.board-col');
 
 function whoIsTheWinner(player: string, index: number): void {
   const currentStack = drops['col' + index] = drops['col' + index] || [];
@@ -9,7 +10,7 @@ function whoIsTheWinner(player: string, index: number): void {
   currentStack.push(player);
 
   // TODO: use arrow function's return statement from one row feature
-  traverseVertical(currentStack)
+  traverseAir(currentStack)
       .then(result => console.info(`%c ${result}`, 'background: #222; color: #bada55'))
       .catch((result) => {
         console.log(`traverse vertical reject with: ${result}`);
@@ -95,23 +96,28 @@ const traverseBears = (currentArray: [], index: number, direction: 'left' | 'rig
         nextArrEl = nextArray[currentArray.length + d]
       :
         nextArrEl = nextArray[currentArray.length - d];
-
+      console.groupCollapsed(`Bears ${direction} details`);
       console.log(`Bear ${direction}: condition prev Element === currEll: ${nextArrEl === currEl}`);
       console.log(`Bear ${direction}: nextArrEl: ${nextArrEl}`);
       console.log(`Bear ${direction}: currEll: ${currEl}`);
       console.log(`BearCurrent array length is: ${currentArray.length}`);
       console.log(`Bear Next array length is: ${nextArray.length}`);
+      console.groupEnd();
       if ('col' + j in drops && currEl === nextArrEl) {
         counter++;
+        console.groupCollapsed(`Bears ${direction} details`);
         console.log(`Bear ${direction}: current array is ${currEl}`);
         console.log('Bear ${direction}: incrementing counter from BullLeft traverse');
+        console.groupEnd();
       } else {
         resolve(counter);
         break;
       }
       direction === 'left' ? i-- : i++;
+      console.groupCollapsed(`Bears ${direction} details`);
       console.log(`counter after Bear ${direction} is ${counter}`);
       console.table(drops);
+      console.groupEnd();
     }
   });
 };
@@ -135,28 +141,33 @@ const traverseBulls = (currentArray: [], index: number, direction: 'left' | 'rig
           nextArrEl = nextArray[currentArray.length - d]
           :
           nextArrEl = nextArray[currentArray.length + d];
-
+      console.groupCollapsed(`Bulls ${direction} details`);
       console.log(`Bull ${direction}: condition prev Element === currEll: ${nextArrEl === currEl}`);
       console.log(`Bull ${direction}: prevArrEl: ${nextArrEl}`);
       console.log(`Bull ${direction}: currEll: ${currEl}`);
       console.log(`BCurrent array length is: ${currentArray.length}`);
       console.log(`B Next array length is: ${nextArray.length}`);
+      console.groupEnd();
       if ('col' + j in drops && nextArrEl === currEl) {
         counter++;
+        console.groupCollapsed(`Bulls ${direction} details`);
         console.log(`Bull ${direction}: current array is ${currEl}`);
         console.log('Bull ${direction}: incrementing counter from BullLeft traverse');
+        console.groupEnd();
       } else {
         resolve(counter);
         break;
       }
       direction === 'left' ? i-- : i++;
+      console.groupCollapsed(`Bulls ${direction} details`);
       console.log(`counter after Bull ${direction} is ${counter}`);
       console.table(drops);
+      console.groupEnd();
     }
   });
 };
 
-const traverseVertical = (currentArray) => {
+const traverseAir = (currentArray) => {
   // Check the verticals in the same array
   return new Promise((resolve, reject) => {
     if (currentArray.length > 3 && checkForWinner(currentArray, 4)) {
@@ -184,10 +195,13 @@ const traverseEarth = (currentArray: [], index: number, direction: 'left' | 'rig
     let nextArray;
     let nextArrEl;
     const currEl = [...currentArray].pop();
+    const winners: HTMLSpanElement[] = [];
+    winners.push(cols[i].querySelector('span'));
     while (direction === 'left' ? i >= 0 : i <= 6) {
       const j = direction === 'left' ? i - 1 : i + 1;
       nextArray = drops['col' + j] || [];
       nextArrEl = nextArray[currentArray.length - 1];
+      console.groupCollapsed(`Earth ${direction === 'left' ? 'scorpions' : 'snakes'} details`);
       console.log(`J is ${j}`);
       console.log(`Horizontals ${direction}: currEll === nextArrEl: ${nextArrEl === currEl}`);
       console.log(`Horizontals ${direction}: prevArrEl: ${nextArrEl}`);
@@ -195,17 +209,22 @@ const traverseEarth = (currentArray: [], index: number, direction: 'left' | 'rig
       console.log(`Horizontals ${direction}: INDEX is: ${index}`);
       console.log(`Horizontals Current array length is: ${currentArray.length}`);
       console.log(`Horizontals Next array length is: ${nextArray.length}`);
+      console.groupEnd();
       if ('col' + j in drops && nextArray.length >= currentArray.length && currEl === nextArrEl) {
         counter++;
+        console.groupCollapsed(`Earth ${direction === 'left' ? 'scorpions' : 'snakes'} details`);
         console.log(`Horizontals ${direction}: current array is ${currEl}`);
         console.log(`Horizontals ${direction}: incrementing counter from Horizontal traverse`);
+        console.groupEnd();
       } else {
         resolve(counter);
         break;
       }
       direction === 'left' ? i-- : i++;
+      console.groupCollapsed(`Earth ${direction === 'left' ? 'scorpions' : 'snakes'} details`);
       console.log(`counter after Horizontals ${direction} is ${counter}`);
       console.table(drops);
+      console.groupEnd();
     }
   });
 };
