@@ -7,6 +7,6 @@
     "target": "es5",
     "allowJs": false,
     "allowSyntheticDefaultImports": true,
-    "lib": ["dom", "es2015", "es2016"]
+    "lib": ["dom", "es2018"]
   }
 }
