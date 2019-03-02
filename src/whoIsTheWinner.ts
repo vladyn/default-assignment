@@ -1,6 +1,8 @@
+import pronounceWinner from './pronounceWinner';
 const drops: Object = {};
 let counter: number = 1;
 const cols = document.querySelectorAll('div.board-col');
+const winnerLength = 4;
 
 function whoIsTheWinner(player: string, index: number): void {
   const currentStack = drops['col' + index] = drops['col' + index] || [];
@@ -9,9 +11,12 @@ function whoIsTheWinner(player: string, index: number): void {
   // Fill the Array with span from selected column
   currentStack.push(player);
 
-  // TODO: use arrow function's return statement from one row feature
   traverseAir(currentStack)
-      .then(result => console.info(`%c ${result}`, 'background: #222; color: #bada55'))
+      .then((result) => {
+        const currElement = cols[index].querySelector('span');
+        const winners: any = Array.from(cols[index].querySelectorAll('span'));
+        pronounceWinner(currElement, winners.slice(0, winnerLength));
+      })
       .catch((result) => {
         console.log(`traverse vertical reject with: ${result}`);
         traverseScorpions(currentStack, index)
@@ -36,26 +41,17 @@ function whoIsTheWinner(player: string, index: number): void {
               console.info(`%c ${result} within 🐂 Bulls left`,
                   'background: #222; color: #bada55; padding: 2px');
               return traverseBullRight(currentStack, index);
-            }, (winner) => {
-              console.info(`%c ${winner} 🐂 Bulls left WIN`,
-                'background: #efefef; color: #bada55; padding: 2px; font-size: 16px');
             })
             .then((result) => {
               console.info(`%c ${result} within 🐂 Bulls right`,
                   'background: #222; color: #bada55; padding: 2px');
               counter = 1;
               return traverseBearLeft(currentStack, index);
-            }, (winner) => {
-              console.log(`%c ${winner} Bear 🐻 left WIN`,
-                'background: #126349; color: #bada55; padding: 2px; font-size: 16px');
             })
             .then((result) => {
               console.info(`%c ${result} within 🐻 Bear left`,
                   'background: #cc6a74; color: #faf6e1; padding: 2px');
               return traverseBearRight(currentStack, index);
-            }, (winner) => {
-              console.log(`%c ${winner} Bear 🐻 right WIN`,
-                'background: #126349; color: #bada55; padding: 2px; font-size: 16px');
             })
             .then((result) => {
               console.info(`%c ${result} within 🐻 Bear right`,
@@ -167,36 +163,25 @@ const traverseBulls = (currentArray: [], index: number, direction: 'left' | 'rig
   });
 };
 
-const traverseAir = (currentArray) => {
+const traverseAir = (currentArray: []) => {
   // Check the verticals in the same array
   return new Promise((resolve, reject) => {
-    if (currentArray.length > 3 && checkForWinner(currentArray, 4)) {
-      resolve('We have a winner on the vertical!');
+    if (currentArray.length > 3 && checkForWinner(currentArray, winnerLength)) {
+      resolve({ arrayContext: currentArray.reverse().slice(0, winnerLength) });
     } else {
       reject('left');
     }
   });
 };
 
-// TODO: try to refactor this and combine it with the Forward traverse
-const traverseScorpions = (currentArray: [], index: number) => {
-  return traverseEarth(currentArray, index, 'left');
-};
-
-// TODO: try to refactor this and combine it with the Backward traverse
-const traverseSnakes = (currentArray: [], index: number) => {
-  return traverseEarth(currentArray, index, 'right');
-};
-
 const traverseEarth = (currentArray: [], index: number, direction: 'left' | 'right') => {
   return new Promise((resolve, reject) => {
-    if (counter === 4) reject(new Error(`We have a winner on ${direction} with a ${counter}`));
     let i = index;
     let nextArray;
     let nextArrEl;
     const currEl = [...currentArray].pop();
-    const winners: HTMLSpanElement[] = [];
-    winners.push(cols[i].querySelector('span'));
+    const currHtmlEl = cols[i].querySelector('span');
+    const nominated: [HTMLSpanElement] = [currHtmlEl];
     while (direction === 'left' ? i >= 0 : i <= 6) {
       const j = direction === 'left' ? i - 1 : i + 1;
       nextArray = drops['col' + j] || [];
@@ -206,16 +191,36 @@ const traverseEarth = (currentArray: [], index: number, direction: 'left' | 'rig
       console.log(`Horizontals ${direction}: currEll === nextArrEl: ${nextArrEl === currEl}`);
       console.log(`Horizontals ${direction}: prevArrEl: ${nextArrEl}`);
       console.log(`Horizontals ${direction}: currEll: ${currEl}`);
-      console.log(`Horizontals ${direction}: INDEX is: ${index}`);
+      console.log(`Horizontals column ${direction}: column${i}`);
       console.log(`Horizontals Current array length is: ${currentArray.length}`);
       console.log(`Horizontals Next array length is: ${nextArray.length}`);
       console.groupEnd();
       if ('col' + j in drops && nextArray.length >= currentArray.length && currEl === nextArrEl) {
         counter++;
+        const index: number = Math.abs(nextArray.length - currentArray.length);
+        const elToPush = cols[j].querySelectorAll('span')[index];
+        console.log(index);
+        console.log(cols[j].querySelectorAll('span'));
+        if (nextArray.length > 0 && elToPush.className === currHtmlEl.className) {
+          nominated.push(elToPush);
+        }
+        console.log(nominated);
+        console.group(`NOMINATED ${direction === 'left' ? 'scorpions' : 'snakes'} details`);
+        console.log(`J is ${j}`);
+        console.log(`Horizontals ${direction}: next span: ${elToPush}`);
+        console.log(`Horizontals ${direction}: currEll: ${currHtmlEl}`);
+        console.log(`Horizontals ${direction}: INDEX is: ${i}`);
+        console.log(`Horizontals Next array length is: ${cols[j].querySelectorAll('span').length}`);
+        console.groupEnd();
         console.groupCollapsed(`Earth ${direction === 'left' ? 'scorpions' : 'snakes'} details`);
         console.log(`Horizontals ${direction}: current array is ${currEl}`);
         console.log(`Horizontals ${direction}: incrementing counter from Horizontal traverse`);
         console.groupEnd();
+        if (counter === 4) {
+          pronounceWinner(currHtmlEl, nominated);
+          reject(new Error(`We have a winner on ${direction} with a ${counter}`));
+          break;
+        }
       } else {
         resolve(counter);
         break;
@@ -227,6 +232,14 @@ const traverseEarth = (currentArray: [], index: number, direction: 'left' | 'rig
       console.groupEnd();
     }
   });
+};
+
+const traverseScorpions = (currentArray: [], index: number) => {
+  return traverseEarth(currentArray, index, 'left');
+};
+
+const traverseSnakes = (currentArray: [], index: number) => {
+  return traverseEarth(currentArray, index, 'right');
 };
 
 const traverseBullLeft = (currentArray: [], index: number) => {
