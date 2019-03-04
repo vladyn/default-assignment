@@ -3,6 +3,7 @@ const drops: Object = {};
 let counter: number = 1;
 const cols = document.querySelectorAll('div.board-col');
 const winnerLength = 4;
+const winners: HTMLSpanElement[] = [];
 
 function whoIsTheWinner(player: string, index: number): void {
   const currentStack = drops['col' + index] = drops['col' + index] || [];
@@ -15,6 +16,7 @@ function whoIsTheWinner(player: string, index: number): void {
       .then((result) => {
         const currElement = cols[index].querySelector('span');
         const winners: any = Array.from(cols[index].querySelectorAll('span'));
+        console.log(result);
         pronounceWinner(currElement, winners.slice(0, winnerLength));
       })
       .catch((result) => {
@@ -27,15 +29,20 @@ function whoIsTheWinner(player: string, index: number): void {
             }, (winner) => {
               console.log(`%c ${winner} Scorpions 🦂 WIN`,
                 'background: #126349; color: #bada55; padding: 2px; font-size: 16px');
+              const currElement = cols[index].querySelector('span');
+              pronounceWinner(currElement, winners.slice(0, winnerLength));
             })
             .then((result) => {
               console.info(`%c ${result} within direction right 🐍`,
                   'background: #222; color: #bada55; padding: 2px');
               counter = 1;
+              winners.length = 0;
               return traverseBullLeft(currentStack, index);
             }, (winner) => {
               console.log(`%c ${winner} Snakes 🐍 WIN`,
                 'background: #126349; color: #bada55; padding: 2px; font-size: 16px');
+              const currElement = cols[index].querySelector('span');
+              pronounceWinner(currElement, winners.slice(0, winnerLength));
             })
             .then((result) => {
               console.info(`%c ${result} within 🐂 Bulls left`,
@@ -46,6 +53,7 @@ function whoIsTheWinner(player: string, index: number): void {
               console.info(`%c ${result} within 🐂 Bulls right`,
                   'background: #222; color: #bada55; padding: 2px');
               counter = 1;
+              winners.length = 0;
               return traverseBearLeft(currentStack, index);
             })
             .then((result) => {
@@ -180,8 +188,8 @@ const traverseEarth = (currentArray: [], index: number, direction: 'left' | 'rig
     let nextArray;
     let nextArrEl;
     const currEl = [...currentArray].pop();
-    const currHtmlEl = cols[i].querySelector('span');
-    const nominated: [HTMLSpanElement] = [currHtmlEl];
+    const currHtmlEl = cols[i].querySelectorAll('span')[0];
+    winners.length === 0 ? winners.push(currHtmlEl) : console.log(winners);
     while (direction === 'left' ? i >= 0 : i <= 6) {
       const j = direction === 'left' ? i - 1 : i + 1;
       nextArray = drops['col' + j] || [];
@@ -199,12 +207,10 @@ const traverseEarth = (currentArray: [], index: number, direction: 'left' | 'rig
         counter++;
         const index: number = Math.abs(nextArray.length - currentArray.length);
         const elToPush = cols[j].querySelectorAll('span')[index];
-        console.log(index);
-        console.log(cols[j].querySelectorAll('span'));
         if (nextArray.length > 0 && elToPush.className === currHtmlEl.className) {
-          nominated.push(elToPush);
+          winners.push(elToPush);
         }
-        console.log(nominated);
+        console.log(winners);
         console.group(`NOMINATED ${direction === 'left' ? 'scorpions' : 'snakes'} details`);
         console.log(`J is ${j}`);
         console.log(`Horizontals ${direction}: next span: ${elToPush}`);
@@ -217,8 +223,8 @@ const traverseEarth = (currentArray: [], index: number, direction: 'left' | 'rig
         console.log(`Horizontals ${direction}: incrementing counter from Horizontal traverse`);
         console.groupEnd();
         if (counter === 4) {
-          pronounceWinner(currHtmlEl, nominated);
-          reject(new Error(`We have a winner on ${direction} with a ${counter}`));
+          reject(`We have a winner on ${direction} with a ${counter}`);
+          reject(`We have a winner on ${direction} with a ${counter}`);
           break;
         }
       } else {

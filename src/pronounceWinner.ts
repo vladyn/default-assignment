@@ -1,4 +1,4 @@
-export function pronounceWinner(element: HTMLSpanElement, winners: [HTMLSpanElement]) {
+export function pronounceWinner(element: HTMLSpanElement, winners: HTMLSpanElement[]) {
   const transitionEvent = whichTransitionEvent();
 
   element.addEventListener(transitionEvent, transitionEndCallback);
