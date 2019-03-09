@@ -9,7 +9,6 @@ function whoIsTheWinner(player: string, index: number): void {
   const currentStack = drops['col' + index] = drops['col' + index] || [];
   counter = 1;
 
-  // Fill the Array with span from selected column
   currentStack.push(player);
 
   traverseAir(currentStack)
@@ -48,6 +47,11 @@ function whoIsTheWinner(player: string, index: number): void {
               console.info(`%c ${result} within 🐂 Bulls left`,
                   'background: #222; color: #bada55; padding: 2px');
               return traverseBullRight(currentStack, index);
+            }, (winner) => {
+              console.log(`%c ${winner} Bulls left 🐂 WIN`,
+                'background: #126349; color: #bada55; padding: 2px; font-size: 16px');
+              const currElement = cols[index].querySelector('span');
+              pronounceWinner(currElement, winners.slice(0, winnerLength));
             })
             .then((result) => {
               console.info(`%c ${result} within 🐂 Bulls right`,
@@ -55,21 +59,34 @@ function whoIsTheWinner(player: string, index: number): void {
               counter = 1;
               winners.length = 0;
               return traverseBearLeft(currentStack, index);
+            }, (winner) => {
+              console.log(`%c ${winner} Bulls right 🐂 WIN`,
+                'background: #126349; color: #bada55; padding: 2px; font-size: 16px');
             })
             .then((result) => {
               console.info(`%c ${result} within 🐻 Bear left`,
                   'background: #cc6a74; color: #faf6e1; padding: 2px');
               return traverseBearRight(currentStack, index);
+            }, (winner) => {
+              console.log(`%c ${winner} 🐻 Bear left WIN`,
+                'background: #126349; color: #bada55; padding: 2px; font-size: 16px');
             })
             .then((result) => {
               console.info(`%c ${result} within 🐻 Bear right`,
                   'background: #cc6a74; color: #faf6e1; padding: 2px');
+              winners.length = 0;
+              counter = 1;
+            }, (winner) => {
+              console.log(`%c ${winner} 🐻 Bear right WIN`,
+                'background: #126349; color: #bada55; padding: 2px; font-size: 16px');
+              winners.length = 0;
+              counter = 1;
             });
       });
 }
 export default whoIsTheWinner;
 
-const checkForWinner = (array, length: number = 4) => {
+const checkForWinner = (array, length: number = winnerLength) => {
   let count = 0;
   let value = array[0];
   return array.some((item) => {
@@ -82,17 +99,24 @@ const checkForWinner = (array, length: number = 4) => {
 };
 
 const traverseBears = (currentArray: [], index: number, direction: 'left' | 'right') => {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     let i = index;
     let nextArray;
     let nextArrEl;
-    let d = direction === 'left' ? -1 : 1;
+    let d: number = direction === 'left' ? -1 : 1;
+    let c: number = direction === 'left' ? -1 : 0;
     const currEl = [...currentArray].pop();
+    const currHtmlEl: HTMLSpanElement = cols[i].querySelectorAll('span')[0];
+    let elToPush: HTMLSpanElement;
+    if (winners.length === 0) winners.push(currHtmlEl);
     while (direction === 'left' ? i >= 0 : i <= 6) {
       console.log(`i is ${i}`);
       const j = direction === 'left' ? i - 1 : i + 1;
       console.log(`j is ${j}`);
       d++;
+      nextArray = drops['col' + j] || [];
+      let nextElSameLevel: number;
+      nextElSameLevel = Math.abs(nextArray.length - currentArray.length);
       console.log(`d is ${d}`);
       nextArray = drops['col' + j] || [];
       nextArrEl = direction === 'left'
@@ -109,16 +133,31 @@ const traverseBears = (currentArray: [], index: number, direction: 'left' | 'rig
       console.groupEnd();
       if ('col' + j in drops && currEl === nextArrEl) {
         counter++;
+        elToPush = cols[j].querySelectorAll('span')[nextElSameLevel + c];
+        console.log(elToPush = cols[j].querySelectorAll('span')[nextElSameLevel + c]);
+        console.log(`d is ${d}`);
+        console.log(`c is ${c}`);
+        console.log(`index is ${nextElSameLevel}`);
+        c++;
+        if (nextArray.length > 0 && elToPush.className === currHtmlEl.className) {
+          winners.push(elToPush);
+        }
         console.groupCollapsed(`Bears ${direction} details`);
+        console.log(`d is ${d}`);
+        console.log(`c is ${c}`);
         console.log(`Bear ${direction}: current array is ${currEl}`);
         console.log('Bear ${direction}: incrementing counter from BullLeft traverse');
         console.groupEnd();
+        if (counter === winnerLength) {
+          reject(`We have a winner on ${direction} of Bears with a ${counter}`);
+          break;
+        }
       } else {
         resolve(counter);
         break;
       }
       direction === 'left' ? i-- : i++;
-      console.groupCollapsed(`Bears ${direction} details`);
+      console.groupCollapsed(`Bears ${direction} details after`);
       console.log(`counter after Bear ${direction} is ${counter}`);
       console.table(drops);
       console.groupEnd();
@@ -127,43 +166,63 @@ const traverseBears = (currentArray: [], index: number, direction: 'left' | 'rig
 };
 
 const traverseBulls = (currentArray: [], index: number, direction: 'left' | 'right') => {
-  return new Promise((resolve) => {
-    let i = index;
-    let nextArray;
-    let nextArrEl;
-    let d = direction === 'left' ? 1 : -1;
-    const currEl = [...currentArray].pop();
+  return new Promise((resolve, reject) => {
+    let i: number = index;
+    let nextArray: [];
+    let nextArrEl: string;
+    let d: number = direction === 'left' ? 1 : -1;
+    let c: number = direction === 'left' ? 1 : 1;
+    const currEl: string = [...currentArray].pop();
+    const currHtmlEl: HTMLSpanElement = cols[i].querySelectorAll('span')[0];
+    let elToPush: HTMLSpanElement;
+    if (winners.length === 0) winners.push(currHtmlEl);
     while (direction === 'left' ? i >= 0 : i <= 6) {
       console.log(`i is ${i}`);
       const j = direction === 'left' ? i - 1 : i + 1;
       console.log(`j is ${j}`);
-      d++;
       console.log(`d is ${d}`);
       nextArray = drops['col' + j] || [];
+      let nextElSameLevel: number;
+      nextElSameLevel = Math.abs(nextArray.length - currentArray.length);
+      d++;
       nextArrEl = direction === 'left'
           ?
           nextArrEl = nextArray[currentArray.length - d]
           :
           nextArrEl = nextArray[currentArray.length + d];
+
       console.groupCollapsed(`Bulls ${direction} details`);
       console.log(`Bull ${direction}: condition prev Element === currEll: ${nextArrEl === currEl}`);
+      console.log(`Bull ${direction}: D id: ${d}`);
       console.log(`Bull ${direction}: prevArrEl: ${nextArrEl}`);
       console.log(`Bull ${direction}: currEll: ${currEl}`);
       console.log(`BCurrent array length is: ${currentArray.length}`);
       console.log(`B Next array length is: ${nextArray.length}`);
       console.groupEnd();
+
       if ('col' + j in drops && nextArrEl === currEl) {
         counter++;
+        elToPush = cols[j].querySelectorAll('span')[nextElSameLevel - c];
+        console.log(elToPush = cols[j].querySelectorAll('span')[nextElSameLevel - c]);
+        c++;
+        if (nextArray.length > 0 && elToPush.className === currHtmlEl.className) {
+          winners.push(elToPush);
+        }
+        console.log(winners);
         console.groupCollapsed(`Bulls ${direction} details`);
         console.log(`Bull ${direction}: current array is ${currEl}`);
         console.log('Bull ${direction}: incrementing counter from BullLeft traverse');
         console.groupEnd();
+        if (counter === winnerLength) {
+          reject(`We have a winner on ${direction} of Bulls with a ${counter}`);
+          break;
+        }
       } else {
         resolve(counter);
         break;
       }
       direction === 'left' ? i-- : i++;
-      console.groupCollapsed(`Bulls ${direction} details`);
+      console.groupCollapsed(`Bulls ${direction} details after`);
       console.log(`counter after Bull ${direction} is ${counter}`);
       console.table(drops);
       console.groupEnd();
@@ -172,7 +231,6 @@ const traverseBulls = (currentArray: [], index: number, direction: 'left' | 'rig
 };
 
 const traverseAir = (currentArray: []) => {
-  // Check the verticals in the same array
   return new Promise((resolve, reject) => {
     if (currentArray.length > 3 && checkForWinner(currentArray, winnerLength)) {
       resolve({ arrayContext: currentArray.reverse().slice(0, winnerLength) });
@@ -189,7 +247,7 @@ const traverseEarth = (currentArray: [], index: number, direction: 'left' | 'rig
     let nextArrEl;
     const currEl = [...currentArray].pop();
     const currHtmlEl = cols[i].querySelectorAll('span')[0];
-    winners.length === 0 ? winners.push(currHtmlEl) : console.log(winners);
+    if (winners.length === 0) winners.push(currHtmlEl);
     while (direction === 'left' ? i >= 0 : i <= 6) {
       const j = direction === 'left' ? i - 1 : i + 1;
       nextArray = drops['col' + j] || [];
@@ -210,7 +268,6 @@ const traverseEarth = (currentArray: [], index: number, direction: 'left' | 'rig
         if (nextArray.length > 0 && elToPush.className === currHtmlEl.className) {
           winners.push(elToPush);
         }
-        console.log(winners);
         console.group(`NOMINATED ${direction === 'left' ? 'scorpions' : 'snakes'} details`);
         console.log(`J is ${j}`);
         console.log(`Horizontals ${direction}: next span: ${elToPush}`);
@@ -222,8 +279,7 @@ const traverseEarth = (currentArray: [], index: number, direction: 'left' | 'rig
         console.log(`Horizontals ${direction}: current array is ${currEl}`);
         console.log(`Horizontals ${direction}: incrementing counter from Horizontal traverse`);
         console.groupEnd();
-        if (counter === 4) {
-          reject(`We have a winner on ${direction} with a ${counter}`);
+        if (counter === winnerLength) {
           reject(`We have a winner on ${direction} with a ${counter}`);
           break;
         }
