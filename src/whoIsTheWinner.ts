@@ -70,6 +70,8 @@ function whoIsTheWinner(player: string, index: number): void {
             }, (winner) => {
               console.log(`%c ${winner} 🐻 Bear left WIN`,
                 'background: #126349; color: #bada55; padding: 2px; font-size: 16px');
+              const currElement = cols[index].querySelector('span');
+              pronounceWinner(currElement, winners.slice(0, winnerLength));
             })
             .then((result) => {
               console.info(`%c ${result} within 🐻 Bear right`,
@@ -79,6 +81,8 @@ function whoIsTheWinner(player: string, index: number): void {
             }, (winner) => {
               console.log(`%c ${winner} 🐻 Bear right WIN`,
                 'background: #126349; color: #bada55; padding: 2px; font-size: 16px');
+              const currElement = cols[index].querySelector('span');
+              pronounceWinner(currElement, winners.slice(0, winnerLength));
               winners.length = 0;
               counter = 1;
             });
@@ -104,7 +108,7 @@ const traverseBears = (currentArray: [], index: number, direction: 'left' | 'rig
     let nextArray;
     let nextArrEl;
     let d: number = direction === 'left' ? -1 : 1;
-    let c: number = direction === 'left' ? -1 : 0;
+    let c: number = 1;
     const currEl = [...currentArray].pop();
     const currHtmlEl: HTMLSpanElement = cols[i].querySelectorAll('span')[0];
     let elToPush: HTMLSpanElement;
@@ -133,15 +137,22 @@ const traverseBears = (currentArray: [], index: number, direction: 'left' | 'rig
       console.groupEnd();
       if ('col' + j in drops && currEl === nextArrEl) {
         counter++;
-        elToPush = cols[j].querySelectorAll('span')[nextElSameLevel + c];
+        elToPush = direction === 'left'
+          ?
+          cols[j].querySelectorAll('span')[nextElSameLevel - c]
+          :
+          cols[j].querySelectorAll('span')[nextElSameLevel + c];
+        console.log(elToPush = cols[j].querySelectorAll('span')[nextElSameLevel - c]);
         console.log(elToPush = cols[j].querySelectorAll('span')[nextElSameLevel + c]);
         console.log(`d is ${d}`);
         console.log(`c is ${c}`);
+        console.log(`когато посоката е ${direction}`);
         console.log(`index is ${nextElSameLevel}`);
-        c++;
         if (nextArray.length > 0 && elToPush.className === currHtmlEl.className) {
           winners.push(elToPush);
+          console.log(winners);
         }
+        c++;
         console.groupCollapsed(`Bears ${direction} details`);
         console.log(`d is ${d}`);
         console.log(`c is ${c}`);
