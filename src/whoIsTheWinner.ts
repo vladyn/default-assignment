@@ -1,6 +1,7 @@
 import pronounceWinner from './pronounceWinner';
+import traverseAir from './traverseAir';
 const drops: Object = {};
-let counter: number = 1;
+let counter: number;
 const cols = document.querySelectorAll('div.board-col');
 const winnerLength = 4;
 const winners: HTMLSpanElement[] = [];
@@ -8,10 +9,9 @@ const winners: HTMLSpanElement[] = [];
 function whoIsTheWinner(player: string, index: number): void {
   const currentStack = drops['col' + index] = drops['col' + index] || [];
   counter = 1;
-
   currentStack.push(player);
 
-  traverseAir(currentStack)
+  traverseAir(currentStack, winnerLength)
       .then(() => {
         const currElement = cols[index].querySelector('span');
         const winners: any = Array.from(cols[index].querySelectorAll('span'));
@@ -32,7 +32,7 @@ function whoIsTheWinner(player: string, index: number): void {
               const currElement = cols[index].querySelector('span');
               pronounceWinner(currElement, winners.slice(0, winnerLength));
             })
-            .then(() => traverseBullRight(currentStack, index),() => {
+            .then(() => traverseBullRight(currentStack, index), () => {
               const currElement = cols[index].querySelector('span');
               pronounceWinner(currElement, winners.slice(0, winnerLength));
             })
@@ -45,7 +45,7 @@ function whoIsTheWinner(player: string, index: number): void {
               pronounceWinner(currElement, winners.slice(0, winnerLength));
               console.log(winners);
             })
-            .then((result) => traverseBearRight(currentStack, index), () => {
+            .then(() => traverseBearRight(currentStack, index), () => {
               const currElement = cols[index].querySelector('span');
               pronounceWinner(currElement, winners.slice(0, winnerLength));
             })
@@ -61,18 +61,6 @@ function whoIsTheWinner(player: string, index: number): void {
       });
 }
 export default whoIsTheWinner;
-
-const checkForWinner = (array, length: number = winnerLength) => {
-  let count = 0;
-  let value = array[0];
-  return array.some((item) => {
-    if (value !== item) {
-      count = 0;
-      value = item;
-    }
-    return ++count === length;
-  });
-};
 
 const traverseBears = (currentArray: [], index: number, direction: 'left' | 'right') => {
   return new Promise((resolve, reject) => {
@@ -165,16 +153,6 @@ const traverseBulls = (currentArray: [], index: number, direction: 'left' | 'rig
         break;
       }
       direction === 'left' ? i-- : i++;
-    }
-  });
-};
-
-const traverseAir = (currentArray: []) => {
-  return new Promise((resolve, reject) => {
-    if (currentArray.length > 3 && checkForWinner(currentArray, winnerLength)) {
-      resolve({ arrayContext: currentArray.reverse().slice(0, winnerLength) });
-    } else {
-      reject('left');
     }
   });
 };
