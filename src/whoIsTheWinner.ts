@@ -2,13 +2,13 @@ import pronounceWinner from './pronounceWinner';
 import traverseAir from './traverseAir';
 const drops: Object = {};
 let counter: number;
-const cols = document.querySelectorAll('div.board-col');
+const cols: NodeListOf<Element> = document.querySelectorAll('div.board-col');
 const winnerLength = 4;
-const winners: HTMLSpanElement[] = [];
+let winners: HTMLSpanElement[] = [];
 
 function whoIsTheWinner(player: string, index: number): void {
   const currentStack = drops['col' + index] = drops['col' + index] || [];
-  counter = 1;
+  ({ counter } = resetCounters());
   currentStack.push(player);
 
   traverseAir(currentStack, winnerLength)
@@ -25,8 +25,7 @@ function whoIsTheWinner(player: string, index: number): void {
                 pronounceWinner(currElement, winners.slice(0, winnerLength));
               })
             .then(() => {
-              counter = 1;
-              winners.length = 0;
+              ({ counter,  winners } = resetCounters());
               return traverseBullLeft(currentStack, index);
             }, () => {
               const currElement = cols[index].querySelector('span');
@@ -37,8 +36,7 @@ function whoIsTheWinner(player: string, index: number): void {
               pronounceWinner(currElement, winners.slice(0, winnerLength));
             })
             .then(() => {
-              counter = 1;
-              winners.length = 0;
+              ({ counter,  winners } = resetCounters());
               return traverseBearLeft(currentStack, index);
             }, () => {
               const currElement = cols[index].querySelector('span');
@@ -50,17 +48,24 @@ function whoIsTheWinner(player: string, index: number): void {
               pronounceWinner(currElement, winners.slice(0, winnerLength));
             })
             .then(() => {
-              counter = 1;
-              winners.length = 0;
+              ({ counter,  winners } = resetCounters());
             }, () => {
               const currElement = cols[index].querySelector('span');
               pronounceWinner(currElement, winners.slice(0, winnerLength));
-              counter = 1;
-              winners.length = 0;
+              ({ counter,  winners } = resetCounters());
             });
       });
 }
 export default whoIsTheWinner;
+
+function resetCounters() {
+  const d: [] = [];
+  const c = 1;
+  return {
+    counter: c,
+    winners: d
+  };
+}
 
 const traverseBears = (currentArray: [], index: number, direction: 'left' | 'right') => {
   return new Promise((resolve, reject) => {
@@ -163,7 +168,7 @@ const traverseEarth = (currentArray: [], index: number, direction: 'left' | 'rig
     let nextArray;
     let nextArrEl;
     const currEl = [...currentArray].pop();
-    const currHtmlEl = cols[i].querySelectorAll('span')[0];
+    const currHtmlEl = cols[i].querySelector('span');
     if (winners.length === 0) winners.push(currHtmlEl);
     while (direction === 'left' ? i >= 0 : i <= 6) {
       const j = direction === 'left' ? i - 1 : i + 1;
