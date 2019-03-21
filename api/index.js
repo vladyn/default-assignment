@@ -7,8 +7,9 @@ const JOIN_CHANNEL = 'JOIN_CHANNEL';
 const LEAVE_CHANNEL = 'LEAVE_CHANNEL';
 const CHANNELS = new Map();
 
-const server = http.createServer(({ response }) => {
-    response.writeHead(404);
+const server = http.createServer(( request, response ) => {
+    response.writeHead(200);
+    response.write('API is up and running');
     response.end();
 });
 

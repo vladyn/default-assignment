@@ -54,6 +54,10 @@ const connection = client.connect({ name: 'George' });
 const channel = connection.join('ch1');
 channel.downstream.subscribe({
   next: ({ data }) => {
+    console.log(client.ready());
+    if (data.channel.size > 2) {
+      console.log(`Game is limited to two players only. You have ${data.channel.size} players connected`);
+    }
     if (data.error) {
       console.log('# Something went wrong', data.error);
       return;
@@ -65,6 +69,14 @@ channel.downstream.subscribe({
     if (data.message === 'pong') {
       console.log('# Received pong', data);
     }
+    if (data.message === 'Hola!') {
+      const startBtn = document.getElementById('start_btn');
+      const player2Name = document.getElementById('playe2_name');
+      const player2Status = document.getElementById('player2_status');
+      startBtn.classList.remove('mdl-button--disabled');
+      player2Name.textContent = data.meta.name;
+      player2Status.classList.add('player-two');
+    }
   },
   error: err => console.log('# Something went wrong', err),
   complete: () => console.log('# Complete')
@@ -73,8 +85,10 @@ channel.downstream.subscribe({
 // Ping other connected clients every 5 sec.
 const pinging = setInterval(() => channel.send('ping'), 5000);
 
-// Leave channel after 20 sec.
+// Leave channel after 40 sec.
 setTimeout(() => {
   clearInterval(pinging);
   channel.leave();
-}, 20000);
+}, 40000);
+
+channel.send('Hola!');
