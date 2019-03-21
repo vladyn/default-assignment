@@ -45,33 +45,30 @@
         </div>
       </div>
 
-      <div class="temporary">
-        <!--<div class="mdl-card mdl-shadow&#45;&#45;2dp flc-card-aside">-->
-        <!--<div class="flc-game-avatar-group">-->
-        <!--<span class="flc-game-avatar woman player-one"></span>-->
-        <!--<span>-->
-        <!--Player one <br>-->
-        <!--<i class="mdl-typography&#45;&#45;caption-color-contrast">(you)</i>-->
-        <!--</span>-->
-        <!--</div>-->
-        <!--<div class="flc-game-avatar-group">-->
-        <!--<span class="flc-game-avatar man"></span>-->
-        <!--<span>-->
-        <!--Player two <br>-->
-        <!--<i class="mdl-typography&#45;&#45;caption-color-contrast">(waiting to join)</i>-->
-        <!--</span>-->
-        <!--</div>-->
-        <!--<div class="mdl-card__actions mdl-card&#45;&#45;border">-->
-        <!--<button onclick="alert('TODO: Implement Start Game route')" class="mdl-button mdl-js-button mdl-button&#45;&#45;raised mdl-button&#45;&#45;accent mdl-js-ripple-effect">-->
-        <!--Start game-->
-        <!--</button>-->
-        <!--<button onclick="alert('TODO: Implement Join Game route')" class="mdl-button mdl-js-button mdl-button&#45;&#45;accent mdl-js-ripple-effect">-->
-        <!--Join game-->
-        <!--</button>-->
-        <!--</div>-->
-        <!--</div>-->
+      <div class="mdl-card mdl-shadow--2dp flc-card-aside">
+      <div class="flc-game-avatar-group">
+      <span class="flc-game-avatar woman player-one"></span>
+      <span>
+      Player one <br>
+      <i class="mdl-typography--caption-color-contrast">(you)</i>
+      </span>
       </div>
-
+      <div class="flc-game-avatar-group">
+      <span id="player2_status" class="flc-game-avatar man"></span>
+      <span>
+      Player two <br>
+      <i id="playe2_name" class="mdl-typography--caption-color-contrast">(waiting to join)</i>
+      </span>
+      </div>
+      <div class="mdl-card__actions mdl-card--border">
+      <button id="start_btn" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect mdl-button--disabled">
+      Start game
+      </button>
+      <!--<button id="join_btn" class="mdl-button mdl-js-button mdl-button&#45;&#45;accent mdl-js-ripple-effect">-->
+      <!--Join game-->
+      <!--</button>-->
+      </div>
+      </div>
     </div>
   </main>
   <!--<footer class="mdl-mega-footer">-->
