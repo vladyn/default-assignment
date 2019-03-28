@@ -166,9 +166,6 @@ export const createClient = (host: string, port: number) => {
       }
       client = new websocket.w3cwebsocket(`ws://${host}:${port}/`, ['echo-protocol']);
       return connect(client, meta);
-    },
-    ready() {
-      return client.readyState;
     }
   };
 };
