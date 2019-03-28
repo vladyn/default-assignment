@@ -4,7 +4,7 @@
     "noImplicitAny": false,
     "module": "commonjs",
     "moduleResolution": "node",
-    "target": "es5",
+    "target": "es2018",
     "allowJs": false,
     "allowSyntheticDefaultImports": true,
     "lib": ["dom", "es2018"]
