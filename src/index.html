@@ -47,58 +47,57 @@
 
       <div class="mdl-card mdl-shadow--2dp flc-card-aside">
       <div class="flc-game-avatar-group">
-      <span class="flc-game-avatar woman player-one"></span>
-      <span>
-      Player one <br>
-      <i class="mdl-typography--caption-color-contrast">(you)</i>
-      </span>
+      <span id="hostPlayerAvatar" class="flc-game-avatar player-one"></span>
+      <div>
+        <span id="hostPlayerName">Player one</span> <br>
+      <i id="hostPlayerStatus" class="mdl-typography--caption-color-contrast">(you)</i>
+      </div>
       </div>
       <div class="flc-game-avatar-group">
-      <span id="player2_status" class="flc-game-avatar man"></span>
-      <span>
-      Player two <br>
-      <i id="playe2_name" class="mdl-typography--caption-color-contrast">(waiting to join)</i>
-      </span>
+      <span id="guestPlayerAvatar" class="flc-game-avatar"></span>
+      <div>
+        <span id="guestPlayerName">Player two</span> <br>
+      <i id="guestPlayerStatus" class="mdl-typography--caption-color-contrast">(waiting to join)</i>
+      </div>
       </div>
       <div class="mdl-card__actions mdl-card--border">
       <button id="start_btn" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect mdl-button--disabled">
       Start game
       </button>
-      <!--<button id="join_btn" class="mdl-button mdl-js-button mdl-button&#45;&#45;accent mdl-js-ripple-effect">-->
-      <!--Join game-->
-      <!--</button>-->
+      <button id="join_btn" class="mdl-button mdl-js-button mdl-button--accent mdl-js-ripple-effect">
+      Join game
+      </button>
       </div>
       </div>
     </div>
   </main>
-  <!--<footer class="mdl-mega-footer">-->
-  <!--<div class="mdl-mega-footer__middle-section">-->
-  <!--<div class="mdl-mega-footer__drop-down-section">-->
-  <!--<h1 class="mdl-mega-footer__heading">Assignment documentation</h1>-->
-  <!--<ul class="mdl-mega-footer__link-list">-->
-  <!--<li><a href="/doc.html#">Documentation</a></li>-->
-  <!--<li><a href="/doc.html#requirements#">Requirements</a></li>-->
-  <!--<li><a href="/doc.html#boilerplate">Boilerplate</a></li>-->
-  <!--<li><a href="/doc.html#how-to-submit">How to submit?</a></li>-->
-  <!--<li><a href="/doc.html#how-do-we-evaluate">How do we evaluate?</a></li>-->
-  <!--</ul>-->
-  <!--</div>-->
-  <!--<div class="mdl-mega-footer__drop-down-section">-->
-  <!--<h1 class="mdl-mega-footer__heading">About Falcon.io</h1>-->
-  <!--<ul class="mdl-mega-footer__link-list">-->
-  <!--<li><a target="_blank" href="https://www.falcon.io/">Home</a></li>-->
-  <!--<li><a target="_blank" href="https://www.falcon.io/company/">Company</a></li>-->
-  <!--<li><a target="_blank" href="https://www.falcon.io/insights-hub/">Blog</a></li>-->
-  <!--</ul>-->
-  <!--</div>-->
-  <!--</div>-->
-  <!--<div class="mdl-mega-footer__bottom-section">-->
-  <!--<div class="mdl-logo">-->
-  <!--<img src="./falcon_logo_white.svg" />-->
-  <!--</div>-->
-  <!--</div>-->
-  <!--</footer>-->
+  <footer class="mdl-mega-footer">
+  <div class="mdl-mega-footer__middle-section">
+  <div class="mdl-mega-footer__drop-down-section">
+  <h1 class="mdl-mega-footer__heading">Assignment documentation</h1>
+  <ul class="mdl-mega-footer__link-list">
+  <li><a href="/doc.html#">Documentation</a></li>
+  <li><a href="/doc.html#requirements#">Requirements</a></li>
+  <li><a href="/doc.html#boilerplate">Boilerplate</a></li>
+  <li><a href="/doc.html#how-to-submit">How to submit?</a></li>
+  <li><a href="/doc.html#how-do-we-evaluate">How do we evaluate?</a></li>
+  </ul>
+  </div>
+  <div class="mdl-mega-footer__drop-down-section">
+  <h1 class="mdl-mega-footer__heading">About Falcon.io</h1>
+  <ul class="mdl-mega-footer__link-list">
+  <li><a target="_blank" href="https://www.falcon.io/">Home</a></li>
+  <li><a target="_blank" href="https://www.falcon.io/company/">Company</a></li>
+  <li><a target="_blank" href="https://www.falcon.io/insights-hub/">Blog</a></li>
+  </ul>
+  </div>
+  </div>
+  <div class="mdl-mega-footer__bottom-section">
+  <div class="mdl-logo">
+  <img src="./falcon_logo_white.svg" />
+  </div>
+  </div>
+  </footer>
 </div>
 </body>
-
 </html>

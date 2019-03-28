@@ -6,11 +6,21 @@ const CHANNEL_NOT_DEFINED_ERROR = { error: 'CHANNEL_NOT_DEFINED' };
 const JOIN_CHANNEL = 'JOIN_CHANNEL';
 const LEAVE_CHANNEL = 'LEAVE_CHANNEL';
 const CHANNELS = new Map();
+const clients = [];
 
 const server = http.createServer(( request, response ) => {
-    response.writeHead(200);
-    response.write('API is up and running');
-    response.end();
+    if ( request.url === '/status') {
+        response.writeHead(200, {'Content-Type': 'application/json'});
+        const statusObject = {
+            players: clients.length,
+            maxAllowed: 2,
+        };
+        response.end(JSON.stringify(statusObject));
+    } else {
+        response.writeHead(404);
+        response.write('Page was not found');
+        response.end();
+    }
 });
 
 server.listen(4000, () => console.log('API is up an running at port 4000'));
@@ -24,14 +34,15 @@ const whitelist = ['http://localhost:8080'];
 const isValidOrigin = origin => whitelist.includes(origin);
 
 const isJoinChannelEvent = message =>
-    (message.type && message.payload && message.type === JOIN_CHANNEL)
+    (message.type && message.payload && message.type === JOIN_CHANNEL);
 
 const isLeaveChannelEvent = message =>
-    (message.type && message.type === LEAVE_CHANNEL)
+    (message.type && message.type === LEAVE_CHANNEL);
 
 const leaveAllChannels = (connection) => {
   CHANNELS.forEach((x, channelName) => leaveChannel(channelName, connection));
-}
+};
+
 const leaveChannel = (channelName, connection) => {
     const { channel, error } = getChannelByName(channelName);
     if (error) {
@@ -41,7 +52,8 @@ const leaveChannel = (channelName, connection) => {
     if (channel.connections.size === 0) {
       CHANNELS.delete(channel);
     }
-}
+};
+
 const getChannel = (channelConfig) => {
     if (!CHANNELS.has(channelConfig.name)) {
         CHANNELS.set(channelConfig.name, {
@@ -58,7 +70,8 @@ const joinChannel = (message, connection) => {
     }
     channel.connections.add(connection);
     return { channel };
-}
+};
+
 const getChannelByName = channelName => {
   const channel = CHANNELS.get(channelName);
   if (!channel) {
@@ -66,23 +79,29 @@ const getChannelByName = channelName => {
   }
   return { channel };
 };
+
 const getError = (channelName, error) => JSON.stringify({
     channel: { name: channelName },
     ...error
-})
+});
 
 WS_SERVER.on('request', request => {
-    if (!isValidOrigin(request.origin)) {
-        request.reject();
+    if (!isValidOrigin(request.origin) || clients.length > 2) {
+        request.reject('403', 'Not allowed origin or too many players');
         return;
-    };
+    }
+    console.log(`${new Date()} Connection from origin ${request.origin}`);
 
     const connection = request.accept('echo-protocol', request.origin);
+    console.log((new Date()) + ' Connection accepted.');
+    let index = clients.push(connection) - 1;
 
     // Broadcast incoming messages back to other connections on channel
     // First connection to send a JOIN_CHANNEL message, creates the channel
     connection.on('message', (data) => {
         const { message, channelName, meta = {} } = JSON.parse(data.utf8Data);
+
+        console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' connected.');
 
         if (isJoinChannelEvent(message)) {
           let { error } = joinChannel(message, connection);
@@ -111,6 +130,10 @@ WS_SERVER.on('request', request => {
             )));
     });
 
-    connection.on('close', () => leaveAllChannels(connection));
+    connection.on('close', () => {
+        console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
+        clients.splice(index, 1);
+        leaveAllChannels(connection);
+    });
 });
 
