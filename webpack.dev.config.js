@@ -10,7 +10,8 @@ module.exports = {
     mode: 'development',
     entry: {
         index: './src/index.ts',
-        doc: './documentation/doc.ts'
+        doc: './documentation/doc.ts',
+        introduce: './src/introduce.ts'
     },
     output: {
         filename: '[name].js',
@@ -52,12 +53,17 @@ module.exports = {
     plugins: [
         new HtmlWebpackPlugin({
             template: 'src/index.html',
-            excludeAssets: [/doc.js/]
+            excludeAssets: [/introduce.js/, /doc.ts/]
         }),
         new HtmlWebpackPlugin({
             filename: 'doc.html',
             template: 'documentation/doc.html',
             excludeAssets: [/index.js/]
+        }),
+        new HtmlWebpackPlugin({
+            filename: 'introduce.html',
+            template: 'src/introduce.html',
+            excludeAssets: [/index.js/],
         }),
         new HtmlWebpackExcludeAssetsPlugin(),
         new webpack.HotModuleReplacementPlugin(),
