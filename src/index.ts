@@ -16,7 +16,6 @@ import { createClient } from '../lib/websocketConnector';
 * Game playground imports
  */
 
-import clickNDrop from './click-n-drop';
 import turnService from './turn-service';
 import whoIsTheWinner from './whoIsTheWinner';
 
@@ -28,6 +27,7 @@ import whoIsTheWinner from './whoIsTheWinner';
 const client = createClient('localhost', 4000);
 const playerName = localStorage.getItem('username');
 const playerGender = localStorage.getItem('gender');
+let cols: NodeListOf<Element>;
 let guestPlayerStatus: HTMLUnknownElement;
 let hostPlayerAvatar: HTMLSpanElement;
 let guestPlayerAvatar: HTMLSpanElement;
@@ -36,7 +36,7 @@ let hostPlayerRole: string;
 let guestPlayerName: HTMLElement;
 let startBtn: HTMLButtonElement;
 let joinBtn: HTMLButtonElement = document.getElementById('join_btn') as HTMLButtonElement;
-let gameIsRunning: boolean = false;
+let gameState: boolean = false;
 
 /**
  * Function watching the DOM loaded state
@@ -54,17 +54,24 @@ document.onreadystatechange = () => {
     guestPlayerAvatar = document.getElementById('guestPlayerAvatar');
     startBtn = document.getElementById('start_btn') as HTMLButtonElement;
     joinBtn = document.getElementById('join_btn') as HTMLButtonElement;
-    const cols: NodeListOf<Element> = document.querySelectorAll('div.board-col');
+    cols = document.querySelectorAll('div.board-col');
+
     // Game playground initializers and events
     joinBtn.addEventListener('click', joinGame);
     startBtn.addEventListener('click', startGame);
+
     // Attach a game logic to the UI
+    // TODO: you can use observable here and subscription to the gameState
     cols.forEach((col, index) => col.addEventListener('click', (evt: any) => {
-      hostPlayerRole = turnService();
       const evtElement = evt.srcElement || evt.target;
-      clickNDrop(evtElement, hostPlayerRole);
-      if (evtElement.classList.contains('board-col')) {
-        whoIsTheWinner(hostPlayerRole, index);
+      if (gameState) {
+        clickNDrop(evtElement, hostPlayerRole);
+        console.log(hostPlayerRole);
+        if (evtElement.classList.contains('board-col')) {
+          whoIsTheWinner(hostPlayerRole, index);
+        }
+        channel.send({ index, player: hostPlayerRole, type: 'turn' });
+        gameState = false;
       }
     }));
   }
@@ -81,6 +88,7 @@ const connection = client.connect({
   name: localStorage.getItem('username'),
   gender: localStorage.getItem('gender')
 });
+
 // 4) Join a channel (ch1) and subscribe to downstream messages.
 // -------------------------
 // If a channel does not exist one will be created.
@@ -96,16 +104,11 @@ channel.downstream.subscribe({
       console.log('# Something went wrong', data.error);
       return;
     }
-    if (data.message === 'ping') {
-      console.log('# Sending pong');
-      channel.send('pong');
-    }
-    if (data.message === 'pong') {
-      console.log('# Received pong', data);
-    }
     if (data.message === 'Hola!') {
       startBtn.classList.toggle('mdl-button--disabled');
-      joinBtn.classList.toggle('mdl-button--disabled');
+      startBtn.disabled = startBtn.disabled !== startBtn.disabled;
+      joinBtn.classList.add('mdl-button--disabled');
+      joinBtn.disabled = true;
       guestPlayerAvatar.classList.add('player-two');
       guestPlayerAvatar.classList.add(data.meta.gender);
       guestPlayerName.textContent = data.meta.name;
@@ -119,26 +122,47 @@ channel.downstream.subscribe({
       guestPlayerStatus.textContent = '(Online)';
     }
     if (data.message === 'Venga!') {
-      startBtn.classList.remove('mdl-button--disabled');
+      startBtn.classList.add('mdl-button--disabled');
+      hostPlayerRole = hostPlayerAvatar.classList.contains('player-one') ? 'player-one' : 'player-two';
+      console.log(hostPlayerRole);
+      gameState = true;
+    }
+    if (data.message.type === 'turn') {
+      const index = data.message.index;
+      const evtElement = cols[index];
+      const player = data.message.player;
+      clickNDrop(evtElement, player);
+      if (evtElement.classList.contains('board-col')) {
+        whoIsTheWinner(player, index);
+      }
+      gameState = true;
     }
   },
   error: err => console.log('# Something went wrong', err),
   complete: () => console.log('# Complete')
 });
 
-// Ping other connected clients every 5 sec.
-const pinging = setInterval(() => channel.send('ping'), 5000);
-
 function joinGame() {
   channel.send('Hola!');
   hostPlayerAvatar.classList.replace('player-one', 'player-two');
-  startBtn.classList.remove('mdl-button--disabled');
   joinBtn.classList.add('mdl-button--disabled');
+  joinBtn.disabled = true;
 }
 
 function startGame() {
-  channel.send('Venga!');
-  gameIsRunning = true;
   hostPlayerRole = hostPlayerAvatar.classList.contains('player-one') ? 'player-one' : 'player-two';
-  console.info(`You are player ${hostPlayerRole}`);
+  channel.send('Venga!');
+  gameState = hostPlayerRole === turnService();
+  startBtn.classList.toggle('mdl-button--disabled');
+  startBtn.disabled = startBtn.disabled !== startBtn.disabled;
+}
+
+function clickNDrop(col: any, player:string) {
+  if (col.querySelectorAll('span').length === 6 && !gameState) {
+    return false;
+  }
+  console.log(hostPlayerRole);
+  const token:HTMLElement = document.createElement('span');
+  token.setAttribute('class', `flc-game-piece ${player}`);
+  col.prepend(token);
 }
