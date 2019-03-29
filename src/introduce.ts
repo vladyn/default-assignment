@@ -1,6 +1,8 @@
 import './index.scss';
 import 'material-design-lite';
 
+let gender: HTMLInputElement[];
+
 const addDetail = async function (detail: { name: string, value: string }) {
   await localStorage.setItem(detail.name, detail.value);
 };
@@ -15,7 +17,7 @@ document.onreadystatechange = () => {
     document.getElementById('play').addEventListener('click', () => {
       addDetail({ name: 'username', value: name.value })
         .then(() => {
-          const gender = Array.from(document.getElementsByName('gender') as NodeListOf<HTMLInputElement>)
+          gender = Array.from(document.getElementsByName('gender') as NodeListOf<HTMLInputElement>)
             .filter((el: HTMLInputElement) => el.checked);
           addDetail({ name: 'gender', value: gender[0].value })
             .then(() => {

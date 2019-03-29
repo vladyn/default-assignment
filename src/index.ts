@@ -18,6 +18,7 @@ import { createClient } from '../lib/websocketConnector';
 
 import turnService from './turn-service';
 import whoIsTheWinner from './whoIsTheWinner';
+import clickNDrop from './click-n-drop';
 
 // 2) Create a client object
 // -------------------------
@@ -65,7 +66,7 @@ document.onreadystatechange = () => {
     cols.forEach((col, index) => col.addEventListener('click', (evt: any) => {
       const evtElement = evt.srcElement || evt.target;
       if (gameState) {
-        clickNDrop(evtElement, hostPlayerRole);
+        clickNDrop(evtElement, hostPlayerRole, gameState);
         console.log(hostPlayerRole);
         if (evtElement.classList.contains('board-col')) {
           whoIsTheWinner(hostPlayerRole, index);
@@ -101,7 +102,7 @@ channel.downstream.subscribe({
       You have ${data.channel.size} players connected`);
     }
     if (data.error) {
-      console.log('# Something went wrong', data.error);
+      console.error('# Something went wrong', data.error);
       return;
     }
     if (data.message === 'Hola!') {
@@ -123,23 +124,24 @@ channel.downstream.subscribe({
     }
     if (data.message === 'Venga!') {
       startBtn.classList.add('mdl-button--disabled');
-      hostPlayerRole = hostPlayerAvatar.classList.contains('player-one') ? 'player-one' : 'player-two';
-      console.log(hostPlayerRole);
+      hostPlayerRole = hostPlayerAvatar.classList.contains('player-one')
+        ? 'player-one'
+        : 'player-two';
       gameState = true;
     }
     if (data.message.type === 'turn') {
       const index = data.message.index;
       const evtElement = cols[index];
       const player = data.message.player;
-      clickNDrop(evtElement, player);
+      clickNDrop(evtElement, player, gameState);
       if (evtElement.classList.contains('board-col')) {
         whoIsTheWinner(player, index);
       }
       gameState = true;
     }
   },
-  error: err => console.log('# Something went wrong', err),
-  complete: () => console.log('# Complete')
+  error: err => console.error('# Something went wrong', err),
+  complete: () => console.info('# Complete')
 });
 
 function joinGame() {
@@ -155,14 +157,4 @@ function startGame() {
   gameState = hostPlayerRole === turnService();
   startBtn.classList.toggle('mdl-button--disabled');
   startBtn.disabled = startBtn.disabled !== startBtn.disabled;
-}
-
-function clickNDrop(col: any, player:string) {
-  if (col.querySelectorAll('span').length === 6 && !gameState) {
-    return false;
-  }
-  console.log(hostPlayerRole);
-  const token:HTMLElement = document.createElement('span');
-  token.setAttribute('class', `flc-game-piece ${player}`);
-  col.prepend(token);
 }

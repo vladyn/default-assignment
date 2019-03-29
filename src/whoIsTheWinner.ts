@@ -41,7 +41,6 @@ function whoIsTheWinner(player: string, index: number): void {
             }, () => {
               const currElement = cols[index].querySelector('span');
               pronounceWinner(currElement, winners.slice(0, winnerLength));
-              console.log(winners);
             })
             .then(() => traverseBearRight(currentStack, index), () => {
               const currElement = cols[index].querySelector('span');
