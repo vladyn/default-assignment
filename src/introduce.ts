@@ -1,6 +1,8 @@
 import './index.scss';
 import 'material-design-lite';
 
+// TODO: Add Ability to re-draw the board on player re-connect
+
 let gender: HTMLInputElement[];
 
 const addDetail = async function (detail: { name: string, value: string }) {

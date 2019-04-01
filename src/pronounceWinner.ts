@@ -1,4 +1,7 @@
-export function pronounceWinner(element: HTMLSpanElement, winners: HTMLSpanElement[]) {
+import { channel } from './clientConnector';
+import { resetBoard } from './resetBoard';
+
+export function pronounceWinner(element: HTMLSpanElement, winners: HTMLSpanElement[]): void {
   const transitionEvent = whichTransitionEvent();
 
   element.addEventListener(transitionEvent, transitionEndCallback);
@@ -8,6 +11,8 @@ export function pronounceWinner(element: HTMLSpanElement, winners: HTMLSpanEleme
     for (const c in winners) {
       winners[c].classList.add('winner');
     }
+    channel.send('winner!');
+    resetBoard();
   }
 
   function whichTransitionEvent() {
