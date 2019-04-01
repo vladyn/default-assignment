@@ -4,28 +4,11 @@
 import './index.scss';
 import 'material-design-lite';
 
-/*
-* Demo of Websocket connector
-* (should be removed as part of the submission)
-*/
-// 1) import the client connector
-// -------------------------
-import { createClient } from '../lib/websocketConnector';
-
-/*
-* Game playground imports
- */
-
+import { channel } from './clientConnector';
 import turnService from './turn-service';
 import whoIsTheWinner from './whoIsTheWinner';
 import clickNDrop from './click-n-drop';
 
-// 2) Create a client object
-// -------------------------
-// This will not create a WS connection, but will only
-// return an object that controls the opening and closing
-// of the connection.
-const client = createClient('localhost', 4000);
 const playerName = localStorage.getItem('username');
 const playerGender = localStorage.getItem('gender');
 let cols: NodeListOf<Element>;
@@ -37,7 +20,9 @@ let hostPlayerRole: string;
 let guestPlayerName: HTMLElement;
 let startBtn: HTMLButtonElement;
 let joinBtn: HTMLButtonElement = document.getElementById('join_btn') as HTMLButtonElement;
-let gameState: boolean = false;
+let yourTurn: boolean = false;
+
+playerName === null ? window.location.href = '/introduce.html' : null;
 
 /**
  * Function watching the DOM loaded state
@@ -62,39 +47,21 @@ document.onreadystatechange = () => {
     startBtn.addEventListener('click', startGame);
 
     // Attach a game logic to the UI
-    // TODO: you can use observable here and subscription to the gameState
+    // TODO: you can use observable here and subscription to the yourTurn
     cols.forEach((col, index) => col.addEventListener('click', (evt: any) => {
       const evtElement = evt.srcElement || evt.target;
-      if (gameState) {
-        clickNDrop(evtElement, hostPlayerRole, gameState);
-        console.log(hostPlayerRole);
+      if (yourTurn) {
+        clickNDrop(evtElement, hostPlayerRole, yourTurn);
         if (evtElement.classList.contains('board-col')) {
           whoIsTheWinner(hostPlayerRole, index);
         }
         channel.send({ index, player: hostPlayerRole, type: 'turn' });
-        gameState = false;
+        yourTurn = false;
       }
     }));
   }
 };
 
-// 3) At a later point in the implementation we can use the
-// -------------------------
-// client object to open a connection.
-// I.e we now have an active Websocket open
-// You can pass in an optional meta object that will be attached to all messages,
-// a possible use case is an object identifying the user on the connection.
-
-const connection = client.connect({
-  name: localStorage.getItem('username'),
-  gender: localStorage.getItem('gender')
-});
-
-// 4) Join a channel (ch1) and subscribe to downstream messages.
-// -------------------------
-// If a channel does not exist one will be created.
-// The `downstream` object is of type <Observable>
-const channel = connection.join(`ch1`);
 channel.downstream.subscribe({
   next: ({ data }) => {
     if (data.channel.size > 2) {
@@ -117,9 +84,9 @@ channel.downstream.subscribe({
       channel.send('amigo!');
     }
     if (data.message === 'amigo!') {
-      guestPlayerName.textContent = data.meta.name;
       guestPlayerAvatar.classList.add('player-one');
       guestPlayerAvatar.classList.add(data.meta.gender);
+      guestPlayerName.textContent = data.meta.name;
       guestPlayerStatus.textContent = '(Online)';
     }
     if (data.message === 'Venga!') {
@@ -127,17 +94,19 @@ channel.downstream.subscribe({
       hostPlayerRole = hostPlayerAvatar.classList.contains('player-one')
         ? 'player-one'
         : 'player-two';
-      gameState = true;
+      yourTurn = true;
     }
     if (data.message.type === 'turn') {
-      const index = data.message.index;
+      const { index, player } = data.message;
       const evtElement = cols[index];
-      const player = data.message.player;
-      clickNDrop(evtElement, player, gameState);
+      clickNDrop(evtElement, player, yourTurn);
       if (evtElement.classList.contains('board-col')) {
         whoIsTheWinner(player, index);
       }
-      gameState = true;
+      yourTurn = true;
+    }
+    if (data.message === 'winner!') {
+      alert('Winner!');
     }
   },
   error: err => console.error('# Something went wrong', err),
@@ -145,16 +114,16 @@ channel.downstream.subscribe({
 });
 
 function joinGame() {
-  channel.send('Hola!');
   hostPlayerAvatar.classList.replace('player-one', 'player-two');
   joinBtn.classList.add('mdl-button--disabled');
   joinBtn.disabled = true;
+  channel.send('Hola!');
 }
 
 function startGame() {
   hostPlayerRole = hostPlayerAvatar.classList.contains('player-one') ? 'player-one' : 'player-two';
-  channel.send('Venga!');
-  gameState = hostPlayerRole === turnService();
+  yourTurn = hostPlayerRole === turnService();
   startBtn.classList.toggle('mdl-button--disabled');
   startBtn.disabled = startBtn.disabled !== startBtn.disabled;
+  channel.send('Venga!');
 }
