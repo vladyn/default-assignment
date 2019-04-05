@@ -7,6 +7,6 @@
     "target": "es2018",
     "allowJs": false,
     "allowSyntheticDefaultImports": true,
-    "lib": ["dom", "es2018"]
+    "lib": ["dom", "es2018", "esnext.array"]
   }
 }
