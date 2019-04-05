@@ -1,7 +1,7 @@
 import { channel } from './clientConnector';
-import { resetBoard } from './resetBoard';
 
-export function pronounceWinner(element: HTMLSpanElement, winners: HTMLSpanElement[]): void {
+export function pronounceWinner(element?: HTMLSpanElement, winners?: HTMLSpanElement[]): void {
+  arguments.length === 0 ? alert('Game is draw') : null;
   const transitionEvent = whichTransitionEvent();
 
   element.addEventListener(transitionEvent, transitionEndCallback);
@@ -12,7 +12,6 @@ export function pronounceWinner(element: HTMLSpanElement, winners: HTMLSpanEleme
       winners[c].classList.add('winner');
     }
     channel.send('winner!');
-    resetBoard();
   }
 
   function whichTransitionEvent() {

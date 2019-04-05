@@ -48,6 +48,8 @@ function whoIsTheWinner(player: string, index: number): void {
             })
             .then(() => {
               ({ counter,  winners } = resetCounters());
+              const some = Object.entries(drops).sort().flat(2);
+              some.length === 49 ? pronounceWinner() : null;
             }, () => {
               const currElement = cols[index].querySelector('span');
               pronounceWinner(currElement, winners.slice(0, winnerLength));
