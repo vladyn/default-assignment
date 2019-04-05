@@ -8,9 +8,12 @@ import { channel } from './clientConnector';
 import turnService from './turn-service';
 import whoIsTheWinner from './whoIsTheWinner';
 import clickNDrop from './click-n-drop';
+import dialogPolyfill from 'dialog-polyfill';
+import resetBoard from './resetBoard';
 
 const playerName = localStorage.getItem('username');
 const playerGender = localStorage.getItem('gender');
+let dialog: HTMLDialogElement;
 let cols: NodeListOf<Element>;
 let guestPlayerStatus: HTMLUnknownElement;
 let hostPlayerAvatar: HTMLSpanElement;
@@ -21,6 +24,7 @@ let guestPlayerName: HTMLElement;
 let startBtn: HTMLButtonElement;
 let joinBtn: HTMLButtonElement = document.getElementById('join_btn') as HTMLButtonElement;
 let yourTurn: boolean = false;
+let gameState: string;
 
 playerName === null ? window.location.href = '/introduce.html' : null;
 
@@ -31,6 +35,17 @@ playerName === null ? window.location.href = '/introduce.html' : null;
 
 document.onreadystatechange = () => {
   if (document.readyState === 'complete') {
+    dialog = document.querySelector('dialog') as any;
+    if (! dialog.showModal) {
+      dialogPolyfill.registerDialog(dialog);
+    }
+    dialog.querySelector('.close').addEventListener('click', () => {
+      dialog.close();
+    });
+    dialog.querySelector('.reset').addEventListener('click', () => {
+      resetBoard();
+      dialog.close();
+    });
     hostPlayerName = document.getElementById('hostPlayerName');
     hostPlayerAvatar = document.getElementById('hostPlayerAvatar');
     hostPlayerName.textContent = playerName;
@@ -47,10 +62,10 @@ document.onreadystatechange = () => {
     startBtn.addEventListener('click', startGame);
 
     // Attach a game logic to the UI
-    // TODO: you can use observable here and subscription to the yourTurn
     cols.forEach((col, index) => col.addEventListener('click', (evt: any) => {
       const evtElement = evt.srcElement || evt.target;
-      if (yourTurn) {
+      const tokens = col.querySelectorAll('span').length;
+      if (yourTurn && tokens < 6 && gameState !== 'ended') {
         clickNDrop(evtElement, hostPlayerRole, yourTurn);
         if (evtElement.classList.contains('board-col')) {
           whoIsTheWinner(hostPlayerRole, index);
@@ -81,6 +96,7 @@ channel.downstream.subscribe({
       guestPlayerAvatar.classList.add(data.meta.gender);
       guestPlayerName.textContent = data.meta.name;
       guestPlayerStatus.textContent = '(Online)';
+      gameState = 'ready';
       channel.send('amigo!');
     }
     if (data.message === 'amigo!') {
@@ -88,6 +104,7 @@ channel.downstream.subscribe({
       guestPlayerAvatar.classList.add(data.meta.gender);
       guestPlayerName.textContent = data.meta.name;
       guestPlayerStatus.textContent = '(Online)';
+      gameState = 'ready';
     }
     if (data.message === 'Venga!') {
       startBtn.classList.add('mdl-button--disabled');
@@ -95,6 +112,7 @@ channel.downstream.subscribe({
         ? 'player-one'
         : 'player-two';
       yourTurn = true;
+      gameState = 'running';
     }
     if (data.message.type === 'turn') {
       const { index, player } = data.message;
@@ -106,10 +124,11 @@ channel.downstream.subscribe({
       yourTurn = true;
     }
     if (data.message === 'winner!') {
-      alert('Winner!');
+      dialog.showModal();
+      gameState = 'ended';
     }
   },
-  error: err => console.error('# Something went wrong', err),
+  error: err => console.error('# An error was spawned:', err),
   complete: () => console.info('# Complete')
 });
 
@@ -117,13 +136,16 @@ function joinGame() {
   hostPlayerAvatar.classList.replace('player-one', 'player-two');
   joinBtn.classList.add('mdl-button--disabled');
   joinBtn.disabled = true;
+  gameState = 'ready';
   channel.send('Hola!');
 }
 
 function startGame() {
+  if (gameState !== 'ready') return;
   hostPlayerRole = hostPlayerAvatar.classList.contains('player-one') ? 'player-one' : 'player-two';
   yourTurn = hostPlayerRole === turnService();
   startBtn.classList.toggle('mdl-button--disabled');
   startBtn.disabled = startBtn.disabled !== startBtn.disabled;
+  gameState = 'running';
   channel.send('Venga!');
 }

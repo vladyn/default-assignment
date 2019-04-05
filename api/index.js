@@ -6,31 +6,20 @@ const CHANNEL_NOT_DEFINED_ERROR = { error: 'CHANNEL_NOT_DEFINED' };
 const JOIN_CHANNEL = 'JOIN_CHANNEL';
 const LEAVE_CHANNEL = 'LEAVE_CHANNEL';
 const CHANNELS = new Map();
-const clients = [];
 
 const server = http.createServer(( request, response ) => {
-    if ( request.url === '/status') {
-        response.writeHead(200, {'Content-Type': 'application/json'});
-        const statusObject = {
-            players: clients.length,
-            maxAllowed: 2,
-        };
-        response.end(JSON.stringify(statusObject));
-    } else {
-        response.writeHead(404);
-        response.write('Page was not found');
-        response.end();
-    }
+    response.writeHead(200, 'API is up an running');
+    response.end();
 });
 
-server.listen(4000, () => console.log('API is up an running at port 4000'));
+server.listen(4000, '192.168.0.104');
 
 const WS_SERVER = new WebSocketServer({
     httpServer: server,
     autoAcceptConnections: false
 });
 
-const whitelist = ['http://localhost:8080'];
+const whitelist = ['http://localhost:8080', 'http://192.168.0.100:8080'];
 const isValidOrigin = origin => whitelist.includes(origin);
 
 const isJoinChannelEvent = message =>
@@ -86,15 +75,14 @@ const getError = (channelName, error) => JSON.stringify({
 });
 
 WS_SERVER.on('request', request => {
-    if (!isValidOrigin(request.origin) || clients.length > 2) {
-        request.reject('403', 'Not allowed origin or too many players');
+    if (!isValidOrigin(request.origin)) {
+        request.reject('403', 'Not allowed origin');
         return;
     }
     console.log(`${new Date()} Connection from origin ${request.origin}`);
 
     const connection = request.accept('echo-protocol', request.origin);
     console.log((new Date()) + ' Connection accepted.');
-    let index = clients.push(connection) - 1;
 
     // Broadcast incoming messages back to other connections on channel
     // First connection to send a JOIN_CHANNEL message, creates the channel
@@ -132,7 +120,6 @@ WS_SERVER.on('request', request => {
 
     connection.on('close', () => {
         console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
-        clients.splice(index, 1);
         leaveAllChannels(connection);
     });
 });
