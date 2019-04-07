@@ -1,7 +1,10 @@
 import { channel } from './clientConnector';
 
 export function pronounceWinner(element?: HTMLSpanElement, winners?: HTMLSpanElement[]): void {
-  arguments.length === 0 ? alert('Game is draw') : null;
+  if (arguments.length === 0) {
+    channel.send('draw!');
+    return;
+  }
   const transitionEvent = whichTransitionEvent();
 
   element.addEventListener(transitionEvent, transitionEndCallback);

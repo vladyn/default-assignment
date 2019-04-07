@@ -12,14 +12,14 @@ const server = http.createServer(( request, response ) => {
     response.end();
 });
 
-server.listen(4000, '192.168.0.104');
+server.listen(4000, 'localhost', () => console.log('API is up an running at port 4000'));
 
 const WS_SERVER = new WebSocketServer({
     httpServer: server,
     autoAcceptConnections: false
 });
 
-const whitelist = ['http://localhost:8080', 'http://192.168.0.100:8080'];
+const whitelist = ['http://localhost:8080', 'http://192.168.0.100:8080', 'http://192.168.0.101:8080'];
 const isValidOrigin = origin => whitelist.includes(origin);
 
 const isJoinChannelEvent = message =>
@@ -79,6 +79,12 @@ WS_SERVER.on('request', request => {
         request.reject('403', 'Not allowed origin');
         return;
     }
+    if (WS_SERVER.connections.length > 1) {
+        request.reject('403', 'Game is allowed for maximum 2 players');
+        console.error('Game is allowed for maximum 2 players');
+        return;
+    }
+
     console.log(`${new Date()} Connection from origin ${request.origin}`);
 
     const connection = request.accept('echo-protocol', request.origin);

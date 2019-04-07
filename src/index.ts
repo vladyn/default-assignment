@@ -22,7 +22,8 @@ let hostPlayerName: HTMLElement;
 let hostPlayerRole: string;
 let guestPlayerName: HTMLElement;
 let startBtn: HTMLButtonElement;
-let joinBtn: HTMLButtonElement = document.getElementById('join_btn') as HTMLButtonElement;
+let joinBtn: HTMLButtonElement;
+let modalTitle : HTMLElement;
 let yourTurn: boolean = false;
 let gameState: string;
 
@@ -55,6 +56,7 @@ document.onreadystatechange = () => {
     guestPlayerAvatar = document.getElementById('guestPlayerAvatar');
     startBtn = document.getElementById('start_btn') as HTMLButtonElement;
     joinBtn = document.getElementById('join_btn') as HTMLButtonElement;
+    modalTitle = dialog.querySelector('h3');
     cols = document.querySelectorAll('div.board-col');
 
     // Game playground initializers and events
@@ -124,6 +126,11 @@ channel.downstream.subscribe({
       yourTurn = true;
     }
     if (data.message === 'winner!') {
+      setTimeout(dialog.showModal(), 3000);
+      gameState = 'ended';
+    }
+    if (data.message === 'draw!') {
+      modalTitle.textContent = 'The GAME is DRAW!';
       dialog.showModal();
       gameState = 'ended';
     }
