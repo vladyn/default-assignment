@@ -10,6 +10,7 @@ import whoIsTheWinner from './whoIsTheWinner';
 import clickNDrop from './click-n-drop';
 import dialogPolyfill from 'dialog-polyfill';
 import resetBoard from './resetBoard';
+import {resolveTxt} from 'dns';
 
 const playerName = localStorage.getItem('username');
 const playerGender = localStorage.getItem('gender');
@@ -84,11 +85,29 @@ channel.downstream.subscribe({
     if (data.channel.size > 2) {
       console.warn(`Game is limited to two players only.
       You have ${data.channel.size} players connected`);
+      window.location.href = '/403';
     }
+
     if (data.error) {
       console.error('# Something went wrong', data.error);
       return;
     }
+
+    if (data.message.type === 'JOIN_CHANNEL') {
+      // TODO: inspect this
+      document.onreadystatechange = (event: any) => {
+        event.target.readyState === 'complete' ? joinBtn.disabled = false : null;
+      };
+      joinBtn.disabled = false;
+    }
+
+    if (data.message.type === 'LEAVE_CHANNEL') {
+      // TODO: inspect this
+      document.onreadystatechange = (event: any) => {
+        event.target.readyState === 'interactive' ? joinBtn.disabled = true : null;
+      };
+    }
+
     if (data.message === 'Hola!') {
       startBtn.classList.toggle('mdl-button--disabled');
       startBtn.disabled = startBtn.disabled !== startBtn.disabled;
@@ -98,16 +117,26 @@ channel.downstream.subscribe({
       guestPlayerAvatar.classList.add(data.meta.gender);
       guestPlayerName.textContent = data.meta.name;
       guestPlayerStatus.textContent = '(Online)';
+      if (localStorage.getItem('board') !== null) {
+        const retrievedBoard = localStorage.getItem('board');
+        restoreBoard(JSON.parse(retrievedBoard));
+      }
       gameState = 'ready';
       channel.send('amigo!');
     }
+
     if (data.message === 'amigo!') {
       guestPlayerAvatar.classList.add('player-one');
       guestPlayerAvatar.classList.add(data.meta.gender);
       guestPlayerName.textContent = data.meta.name;
       guestPlayerStatus.textContent = '(Online)';
+      if (localStorage.getItem('board') !== null) {
+        const retrievedBoard = localStorage.getItem('board');
+        restoreBoard(JSON.parse(retrievedBoard));
+      }
       gameState = 'ready';
     }
+
     if (data.message === 'Venga!') {
       startBtn.classList.add('mdl-button--disabled');
       hostPlayerRole = hostPlayerAvatar.classList.contains('player-one')
@@ -116,6 +145,7 @@ channel.downstream.subscribe({
       yourTurn = true;
       gameState = 'running';
     }
+
     if (data.message.type === 'turn') {
       const { index, player } = data.message;
       const evtElement = cols[index];
@@ -126,13 +156,15 @@ channel.downstream.subscribe({
       yourTurn = true;
     }
     if (data.message === 'winner!') {
-      setTimeout(dialog.showModal(), 3000);
+      setTimeout(() => dialog.showModal(), 3000);
       gameState = 'ended';
+      localStorage.removeItem('board');
     }
     if (data.message === 'draw!') {
       modalTitle.textContent = 'The GAME is DRAW!';
       dialog.showModal();
       gameState = 'ended';
+      localStorage.removeItem('board');
     }
   },
   error: err => console.error('# An error was spawned:', err),
@@ -155,4 +187,15 @@ function startGame() {
   startBtn.disabled = startBtn.disabled !== startBtn.disabled;
   gameState = 'running';
   channel.send('Venga!');
+}
+
+function restoreBoard(board): void {
+  const boardCols = Object.entries(board);
+  for (const col of boardCols) {
+    const index = Number(col.toString().substring(3, 4));
+    const colTokens: [] = col[1] as [];
+    for (const el of colTokens) {
+      clickNDrop(cols[index], el);
+    }
+  }
 }
