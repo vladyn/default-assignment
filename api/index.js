@@ -19,7 +19,8 @@ const WS_SERVER = new WebSocketServer({
     autoAcceptConnections: false
 });
 
-const whitelist = ['http://localhost:8080', 'http://192.168.0.100:8080', 'http://192.168.0.101:8080'];
+const whitelist = ['http://localhost:8080'];
+
 const isValidOrigin = origin => whitelist.includes(origin);
 
 const isJoinChannelEvent = message =>
@@ -96,7 +97,6 @@ WS_SERVER.on('request', request => {
         const { message, channelName, meta = {} } = JSON.parse(data.utf8Data);
 
         console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' connected.');
-
         if (isJoinChannelEvent(message)) {
           let { error } = joinChannel(message, connection);
           if (error) {

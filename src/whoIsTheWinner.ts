@@ -1,12 +1,13 @@
 import pronounceWinner from './pronounceWinner';
 import traverseAir from './traverseAir';
-const drops: Object = {};
+let drops: Object = {};
 let counter: number;
 const cols: NodeListOf<Element> = document.querySelectorAll('div.board-col');
 const winnerLength = 4;
 let winners: HTMLSpanElement[] = [];
 
 function whoIsTheWinner(player: string, index: number): void {
+  if (localStorage.getItem('board')) drops = JSON.parse(localStorage.getItem('board'));
   const currentStack = drops['col' + index] = drops['col' + index] || [];
   ({ counter } = resetCounters());
   currentStack.push(player);
@@ -56,6 +57,9 @@ function whoIsTheWinner(player: string, index: number): void {
               ({ counter,  winners } = resetCounters());
             });
       });
+  localStorage.setItem('board', JSON.stringify(drops));
+  const retrievedBoard = localStorage.getItem('board');
+  console.table(JSON.parse(retrievedBoard));
 }
 export default whoIsTheWinner;
 
