@@ -17,6 +17,7 @@ function whoIsTheWinner(player: string, index: number): void {
         const currElement = cols[index].querySelector('span');
         const winners: any = Array.from(cols[index].querySelectorAll('span'));
         pronounceWinner(currElement, winners.slice(0, winnerLength));
+        ({ counter, drops } = resetCounters());
       })
       .catch(() => {
         traverseScorpions(currentStack, index)
@@ -24,6 +25,7 @@ function whoIsTheWinner(player: string, index: number): void {
               () => {
                 const currElement = cols[index].querySelector('span');
                 pronounceWinner(currElement, winners.slice(0, winnerLength));
+                ({ counter,  winners, drops } = resetCounters());
               })
             .then(() => {
               ({ counter,  winners } = resetCounters());
@@ -31,6 +33,7 @@ function whoIsTheWinner(player: string, index: number): void {
             }, () => {
               const currElement = cols[index].querySelector('span');
               pronounceWinner(currElement, winners.slice(0, winnerLength));
+              ({ counter,  winners, drops } = resetCounters());
             })
             .then(() => traverseBullRight(currentStack, index), () => {
               const currElement = cols[index].querySelector('span');
@@ -42,19 +45,20 @@ function whoIsTheWinner(player: string, index: number): void {
             }, () => {
               const currElement = cols[index].querySelector('span');
               pronounceWinner(currElement, winners.slice(0, winnerLength));
+              ({ counter,  winners, drops } = resetCounters());
             })
             .then(() => traverseBearRight(currentStack, index), () => {
               const currElement = cols[index].querySelector('span');
               pronounceWinner(currElement, winners.slice(0, winnerLength));
             })
             .then(() => {
-              ({ counter,  winners } = resetCounters());
               const some = Object.entries(drops).sort().flat(2);
               some.length === 49 ? pronounceWinner() : null;
+              ({ counter,  winners, drops } = resetCounters());
             }, () => {
               const currElement = cols[index].querySelector('span');
               pronounceWinner(currElement, winners.slice(0, winnerLength));
-              ({ counter,  winners } = resetCounters());
+              ({ counter,  winners, drops } = resetCounters());
             });
       });
   localStorage.setItem('board', JSON.stringify(drops));
@@ -65,10 +69,12 @@ export default whoIsTheWinner;
 
 function resetCounters() {
   const d: [] = [];
+  const drops = {};
   const c = 1;
   return {
+    drops,
     counter: c,
-    winners: d
+    winners: d,
   };
 }
 
