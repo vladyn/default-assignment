@@ -10,7 +10,6 @@ import whoIsTheWinner from './whoIsTheWinner';
 import clickNDrop from './click-n-drop';
 import dialogPolyfill from 'dialog-polyfill';
 import resetBoard from './resetBoard';
-import {resolveTxt} from 'dns';
 
 const playerName = localStorage.getItem('username');
 const playerGender = localStorage.getItem('gender');
@@ -26,7 +25,7 @@ let startBtn: HTMLButtonElement;
 let joinBtn: HTMLButtonElement;
 let modalTitle : HTMLElement;
 let yourTurn: boolean = false;
-let gameState: string;
+let gameState: 'running' | 'ready' | 'ended';
 
 playerName === null ? window.location.href = '/introduce.html' : null;
 
@@ -46,6 +45,8 @@ document.onreadystatechange = () => {
     });
     dialog.querySelector('.reset').addEventListener('click', () => {
       resetBoard();
+      gameState = 'running';
+      startGame();
       dialog.close();
     });
     hostPlayerName = document.getElementById('hostPlayerName');
@@ -96,7 +97,7 @@ channel.downstream.subscribe({
     if (data.message.type === 'JOIN_CHANNEL') {
       // TODO: inspect this
       document.onreadystatechange = (event: any) => {
-        event.target.readyState === 'complete' ? joinBtn.disabled = false : null;
+        event.target.readyState === 'interactive' ? joinBtn.disabled = false : null;
       };
       joinBtn.disabled = false;
     }
