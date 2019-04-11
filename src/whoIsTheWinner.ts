@@ -62,8 +62,6 @@ function whoIsTheWinner(player: string, index: number): void {
             });
       });
   localStorage.setItem('board', JSON.stringify(drops));
-  const retrievedBoard = localStorage.getItem('board');
-  console.table(JSON.parse(retrievedBoard));
 }
 export default whoIsTheWinner;
 
