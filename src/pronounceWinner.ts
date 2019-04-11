@@ -6,7 +6,8 @@ export function pronounceWinner(element?: HTMLSpanElement, winners?: HTMLSpanEle
     return;
   }
   const transitionEvent = whichTransitionEvent();
-
+  const winner: string = element.classList.contains('player-one') ? 'player-one' : 'player-two';
+  const avatar: HTMLCollectionOf<Element> = document.getElementsByClassName('flc-game-avatar');
   element.addEventListener(transitionEvent, transitionEndCallback);
 
   function transitionEndCallback() {
@@ -14,6 +15,9 @@ export function pronounceWinner(element?: HTMLSpanElement, winners?: HTMLSpanEle
     for (const c in winners) {
       winners[c].classList.add('winner');
     }
+    Array.from(avatar).forEach((e) => {
+      e.classList.contains(winner) ? e.classList.add('winner') : null;
+    });
     channel.send('winner!');
   }
 

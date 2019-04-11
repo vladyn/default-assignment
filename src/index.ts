@@ -45,8 +45,9 @@ document.onreadystatechange = () => {
     });
     dialog.querySelector('.reset').addEventListener('click', () => {
       resetBoard();
-      gameState = 'running';
+      gameState = 'ended';
       startGame();
+      channel.send('Hola!');
       dialog.close();
     });
     hostPlayerName = document.getElementById('hostPlayerName');
@@ -99,7 +100,11 @@ channel.downstream.subscribe({
       document.onreadystatechange = (event: any) => {
         event.target.readyState === 'interactive' ? joinBtn.disabled = false : null;
       };
+      joinBtn.classList.remove('mdl-button--disabled');
       joinBtn.disabled = false;
+      guestPlayerStatus.textContent = `(
+      ${data.channel.size - 1} Player(s) ready to join
+      )`;
     }
 
     if (data.message.type === 'LEAVE_CHANNEL') {
@@ -107,6 +112,7 @@ channel.downstream.subscribe({
       document.onreadystatechange = (event: any) => {
         event.target.readyState === 'interactive' ? joinBtn.disabled = true : null;
       };
+      guestPlayerStatus.textContent = '(Offline)';
     }
 
     if (data.message === 'Hola!') {
@@ -114,10 +120,15 @@ channel.downstream.subscribe({
       startBtn.disabled = startBtn.disabled !== startBtn.disabled;
       joinBtn.classList.add('mdl-button--disabled');
       joinBtn.disabled = true;
-      guestPlayerAvatar.classList.add('player-two');
       guestPlayerAvatar.classList.add(data.meta.gender);
       guestPlayerName.textContent = data.meta.name;
+      toggleAvatar();
       guestPlayerStatus.textContent = '(Online)';
+      if (dialog.open) {
+        resetBoard();
+        dialog.close();
+      }
+
       if (localStorage.getItem('board') !== null) {
         const retrievedBoard = localStorage.getItem('board');
         restoreBoard(JSON.parse(retrievedBoard));
@@ -127,9 +138,9 @@ channel.downstream.subscribe({
     }
 
     if (data.message === 'amigo!') {
-      guestPlayerAvatar.classList.add('player-one');
       guestPlayerAvatar.classList.add(data.meta.gender);
       guestPlayerName.textContent = data.meta.name;
+      toggleAvatar();
       guestPlayerStatus.textContent = '(Online)';
       if (localStorage.getItem('board') !== null) {
         const retrievedBoard = localStorage.getItem('board');
@@ -199,4 +210,12 @@ function restoreBoard(board): void {
       clickNDrop(cols[index], el);
     }
   }
+}
+
+function toggleAvatar(): void {
+  hostPlayerAvatar.classList.contains('player-two')
+    ?
+    guestPlayerAvatar.classList.add('player-one')
+    :
+    guestPlayerAvatar.classList.add('player-two');
 }
