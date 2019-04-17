@@ -1,8 +1,6 @@
 import './index.scss';
 import 'material-design-lite';
 
-// TODO: Add Ability to re-draw the board on player re-connect
-
 localStorage.clear();
 
 let gender: HTMLInputElement[];
@@ -16,7 +14,7 @@ document.onreadystatechange = () => {
     const name = document.getElementById('player_name') as HTMLInputElement;
     // Add a close functionality to the Cancel button.
     document.getElementById('later').addEventListener('click', () => {
-      window.location.href = 'http://dir.bg';
+      window.location.href = '/doc.html';
     });
     document.getElementById('play').addEventListener('click', () => {
       addDetail({ name: 'username', value: name.value })

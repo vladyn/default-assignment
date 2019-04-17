@@ -113,11 +113,12 @@ channel.downstream.subscribe({
         event.target.readyState === 'interactive' ? joinBtn.disabled = true : null;
       };
       guestPlayerStatus.textContent = '(Offline)';
+      console.log('leaved the channel');
     }
 
     if (data.message === 'Hola!') {
-      startBtn.classList.toggle('mdl-button--disabled');
-      startBtn.disabled = startBtn.disabled !== startBtn.disabled;
+      startBtn.classList.remove('mdl-button--disabled');
+      startBtn.disabled = false;
       joinBtn.classList.add('mdl-button--disabled');
       joinBtn.disabled = true;
       guestPlayerAvatar.classList.add(data.meta.gender);
@@ -171,16 +172,20 @@ channel.downstream.subscribe({
       setTimeout(() => dialog.showModal(), 3000);
       gameState = 'ended';
       localStorage.removeItem('board');
+      localStorage.removeItem('player');
     }
     if (data.message === 'draw!') {
       modalTitle.textContent = 'The GAME is DRAW!';
       dialog.showModal();
       gameState = 'ended';
       localStorage.removeItem('board');
+      localStorage.removeItem('player');
     }
   },
   error: err => console.error('# An error was spawned:', err),
-  complete: () => console.info('# Complete')
+  complete: () => {
+    console.info('# Complete');
+  }
 });
 
 function joinGame() {
@@ -194,6 +199,7 @@ function joinGame() {
 function startGame() {
   if (gameState !== 'ready') return;
   hostPlayerRole = hostPlayerAvatar.classList.contains('player-one') ? 'player-one' : 'player-two';
+  localStorage.setItem('player', hostPlayerRole);
   yourTurn = hostPlayerRole === turnService();
   startBtn.classList.toggle('mdl-button--disabled');
   startBtn.disabled = startBtn.disabled !== startBtn.disabled;
@@ -203,6 +209,16 @@ function startGame() {
 
 function restoreBoard(board): void {
   const boardCols = Object.entries(board);
+  hostPlayerAvatar.classList.remove('player-one', 'player-two');
+  guestPlayerAvatar.classList.remove('player-one', 'player-two');
+  hostPlayerAvatar.classList.add(localStorage.getItem('player'));
+  guestPlayerAvatar.classList.add(
+    localStorage.getItem('player') === 'player-one'
+      ?
+      'player-two'
+      :
+      'player-one'
+  );
   for (const col of boardCols) {
     const index = Number(col.toString().substring(3, 4));
     const colTokens: [] = col[1] as [];
