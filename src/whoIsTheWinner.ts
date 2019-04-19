@@ -72,7 +72,7 @@ function resetCounters() {
   return {
     drops,
     counter: c,
-    winners: d,
+    winners: d
   };
 }
 
