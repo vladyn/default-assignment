@@ -19,13 +19,13 @@ let guestPlayerStatus: HTMLUnknownElement;
 let hostPlayerAvatar: HTMLSpanElement;
 let guestPlayerAvatar: HTMLSpanElement;
 let hostPlayerName: HTMLElement;
-let hostPlayerRole: string;
+export let hostPlayerRole: string;
 let guestPlayerName: HTMLElement;
 let startBtn: HTMLButtonElement;
 let joinBtn: HTMLButtonElement;
 let modalTitle : HTMLElement;
 let yourTurn: boolean = false;
-let gameState: 'running' | 'ready' | 'ended';
+let gameState: 'running' | 'ready' | 'resumed' | 'ended';
 
 playerName === null ? window.location.href = '/introduce.html' : null;
 
@@ -72,10 +72,11 @@ document.onreadystatechange = () => {
       const tokens = col.querySelectorAll('span').length;
       if (yourTurn && tokens < 6 && gameState !== 'ended') {
         clickNDrop(evtElement, hostPlayerRole, yourTurn);
+        turnService();
         if (evtElement.classList.contains('board-col')) {
           whoIsTheWinner(hostPlayerRole, index);
         }
-        channel.send({ index, player: hostPlayerRole, type: 'turn' });
+        channel.send({ index, player: hostPlayerRole, type: 'turn', state: gameState });
         yourTurn = false;
       }
     }));
@@ -94,6 +95,8 @@ channel.downstream.subscribe({
       console.error('# Something went wrong', data.error);
       return;
     }
+
+    console.log(data);
 
     if (data.message.type === 'JOIN_CHANNEL') {
       // TODO: inspect this
@@ -132,8 +135,10 @@ channel.downstream.subscribe({
       if (localStorage.getItem('board') !== null) {
         const retrievedBoard = localStorage.getItem('board');
         restoreBoard(JSON.parse(retrievedBoard));
+        gameState = 'resumed';
+      } else {
+        gameState = 'ready';
       }
-      gameState = 'ready';
       channel.send('amigo!');
     }
 
@@ -145,8 +150,10 @@ channel.downstream.subscribe({
       if (localStorage.getItem('board') !== null) {
         const retrievedBoard = localStorage.getItem('board');
         restoreBoard(JSON.parse(retrievedBoard));
+        gameState = 'resumed';
+      } else {
+        gameState = 'ready';
       }
-      gameState = 'ready';
     }
 
     if (data.message === 'Venga!') {
@@ -201,10 +208,11 @@ function joinGame() {
 }
 
 function startGame() {
+  console.log(gameState);
+  if (gameState !== 'resumed') resetBoard();
   if (gameState !== 'ready') return;
-  resetBoard();
   hostPlayerRole = hostPlayerAvatar.classList.contains('player-one') ? 'player-one' : 'player-two';
-  yourTurn = hostPlayerRole === turnService();
+  yourTurn = true;
   startBtn.classList.add('mdl-button--disabled');
   startBtn.disabled = true;
   gameState = 'running';
@@ -220,6 +228,7 @@ function restoreBoard(board): void {
       clickNDrop(cols[index], el);
     }
   }
+  gameState = 'resumed';
 }
 
 function toggleAvatar(): void {
