@@ -1,5 +1,7 @@
 import pronounceWinner from './pronounceWinner';
 import traverseAir from './traverseAir';
+import resetCounters from './resetCounters';
+
 let drops: Object = {};
 let counter: number;
 const cols: NodeListOf<Element> = document.querySelectorAll('div.board-col');
@@ -64,17 +66,6 @@ function whoIsTheWinner(player: string, index: number): void {
   localStorage.setItem('board', JSON.stringify(drops));
 }
 export default whoIsTheWinner;
-
-function resetCounters() {
-  const d: [] = [];
-  const drops = {};
-  const c = 1;
-  return {
-    drops,
-    counter: c,
-    winners: d
-  };
-}
 
 const traverseBears = (currentArray: [], index: number, direction: 'left' | 'right') => {
   return new Promise((resolve, reject) => {
