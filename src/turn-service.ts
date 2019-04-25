@@ -5,8 +5,7 @@
 import { hostPlayerRole as player } from './index';
 let playerMove = player;
 
-const turnService = () => {
-  console.log(player);
+const turnService = (): string => {
   return playerMove = playerMove === 'player-two' ? 'player-one' : 'player-two';
 };
 

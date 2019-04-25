@@ -72,12 +72,19 @@ document.onreadystatechange = () => {
       const tokens = col.querySelectorAll('span').length;
       if (yourTurn && tokens < 6 && gameState !== 'ended') {
         clickNDrop(evtElement, hostPlayerRole, yourTurn);
-        turnService();
+        console.log(hostPlayerRole === turnService());
+        if (hostPlayerRole === turnService()) {
+          hostPlayerAvatar.classList.add('their-turn');
+          guestPlayerAvatar.classList.remove('their-turn');
+        } else if (hostPlayerRole !== turnService()) {
+          hostPlayerAvatar.classList.remove('their-turn');
+          guestPlayerAvatar.classList.add('their-turn');
+        }
         if (evtElement.classList.contains('board-col')) {
           whoIsTheWinner(hostPlayerRole, index);
         }
         channel.send({ index, player: hostPlayerRole, type: 'turn', state: gameState });
-        yourTurn = false;
+        turnCircling('theirs');
       }
     }));
   }
@@ -95,8 +102,6 @@ channel.downstream.subscribe({
       console.error('# Something went wrong', data.error);
       return;
     }
-
-    console.log(data);
 
     if (data.message.type === 'JOIN_CHANNEL') {
       // TODO: inspect this
@@ -164,7 +169,7 @@ channel.downstream.subscribe({
       hostPlayerRole = hostPlayerAvatar.classList.contains('player-one')
         ? 'player-one'
         : 'player-two';
-      yourTurn = true;
+      turnCircling('yours');
       gameState = 'running';
     }
 
@@ -175,11 +180,12 @@ channel.downstream.subscribe({
       if (evtElement.classList.contains('board-col')) {
         whoIsTheWinner(player, index);
       }
-      yourTurn = true;
+      turnCircling('yours');
     }
     if (data.message === 'winner!') {
       setTimeout(() => dialog.showModal(), 3000);
       gameState = 'ended';
+      turnCircling('ends');
       localStorage.removeItem('board');
       localStorage.removeItem('player');
     }
@@ -187,6 +193,7 @@ channel.downstream.subscribe({
       modalTitle.textContent = 'The GAME is DRAW!';
       dialog.showModal();
       gameState = 'ended';
+      turnCircling('ends');
       localStorage.removeItem('board');
       localStorage.removeItem('player');
     }
@@ -208,15 +215,17 @@ function joinGame() {
 }
 
 function startGame() {
-  console.log(gameState);
   if (gameState !== 'resumed') resetBoard();
-  if (gameState !== 'ready') return;
-  hostPlayerRole = hostPlayerAvatar.classList.contains('player-one') ? 'player-one' : 'player-two';
-  yourTurn = true;
-  startBtn.classList.add('mdl-button--disabled');
-  startBtn.disabled = true;
-  gameState = 'running';
-  channel.send('Venga!');
+  if (gameState === 'ready' || gameState === 'resumed') {
+    hostPlayerRole = hostPlayerAvatar.classList.contains('player-one') ? 'player-one' : 'player-two';
+    turnCircling('yours');
+    startBtn.classList.add('mdl-button--disabled');
+    startBtn.disabled = true;
+    gameState = 'running';
+    channel.send('Venga!');
+  } else {
+    return;
+  }
 }
 
 function restoreBoard(board): void {
@@ -237,4 +246,24 @@ function toggleAvatar(): void {
     guestPlayerAvatar.classList.add('player-one')
     :
     guestPlayerAvatar.classList.add('player-two');
+}
+
+export function turnCircling(turn: 'yours' | 'theirs' | 'ends'): void {
+  const tokens = 'their-turn';
+  switch (turn) {
+    case 'yours':
+      hostPlayerAvatar.classList.add(tokens);
+      guestPlayerAvatar.classList.remove(tokens);
+      yourTurn = true;
+      break;
+    case 'theirs':
+      guestPlayerAvatar.classList.add(tokens);
+      hostPlayerAvatar.classList.remove(tokens);
+      yourTurn = false;
+      break;
+    case 'ends':
+      guestPlayerAvatar.classList.remove(tokens);
+      hostPlayerAvatar.classList.remove(tokens);
+      break;
+  }
 }
