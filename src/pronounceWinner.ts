@@ -1,4 +1,5 @@
 import { channel } from './clientConnector';
+import { turnCircling } from './index';
 
 export function pronounceWinner(element?: HTMLSpanElement, winners?: HTMLSpanElement[]): void {
   if (arguments.length === 0) {
@@ -18,6 +19,7 @@ export function pronounceWinner(element?: HTMLSpanElement, winners?: HTMLSpanEle
     Array.from(avatar).forEach((e) => {
       e.classList.contains(winner) ? e.classList.add('winner') : null;
     });
+    turnCircling('ends');
     channel.send('winner!');
   }
 
