@@ -72,7 +72,6 @@ document.onreadystatechange = () => {
       const tokens = col.querySelectorAll('span').length;
       if (yourTurn && tokens < 6 && gameState !== 'ended') {
         clickNDrop(evtElement, hostPlayerRole, yourTurn);
-        console.log(hostPlayerRole === turnService());
         if (hostPlayerRole === turnService()) {
           hostPlayerAvatar.classList.add('their-turn');
           guestPlayerAvatar.classList.remove('their-turn');
@@ -169,7 +168,7 @@ channel.downstream.subscribe({
       hostPlayerRole = hostPlayerAvatar.classList.contains('player-one')
         ? 'player-one'
         : 'player-two';
-      turnCircling('yours');
+      turnCircling('theirs');
       gameState = 'running';
     }
 
@@ -217,6 +216,7 @@ function joinGame() {
 function startGame() {
   if (gameState !== 'resumed') resetBoard();
   if (gameState === 'ready' || gameState === 'resumed') {
+    // tslint:disable-next-line:max-line-length
     hostPlayerRole = hostPlayerAvatar.classList.contains('player-one') ? 'player-one' : 'player-two';
     turnCircling('yours');
     startBtn.classList.add('mdl-button--disabled');
@@ -229,6 +229,8 @@ function startGame() {
 }
 
 function restoreBoard(board): void {
+  const player = localStorage.getItem('player') === 'player-two' ? 'player-one' : 'player-two';
+  const turn = hostPlayerRole === player ? 'yours' : 'theirs';
   const boardCols = Object.entries(board);
   for (const col of boardCols) {
     const index = Number(col.toString().substring(3, 4));
@@ -238,6 +240,7 @@ function restoreBoard(board): void {
     }
   }
   gameState = 'resumed';
+  turnCircling(turn);
 }
 
 function toggleAvatar(): void {
