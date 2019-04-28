@@ -24,14 +24,12 @@ export function pronounceWinner(element?: HTMLSpanElement, winners?: HTMLSpanEle
   }
 
   function whichTransitionEvent() {
-    let t;
-
     const animations = {
       animation: 'animationend',
       WebkitAnimation: 'webkitAnimationEnd'
     };
 
-    for (t in animations) {
+    for (const t in animations) {
       if (element.style[t] !== undefined) {
         return animations[t];
       }
