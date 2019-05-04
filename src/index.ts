@@ -27,7 +27,8 @@ let modalTitle : HTMLElement;
 let yourTurn: boolean = false;
 let gameState: 'running' | 'ready' | 'resumed' | 'ended';
 
-playerName === null ? window.location.href = '/introduce.html' : null;
+const url = '/introduce.html';
+playerName === null ? window.location.assign(url) : null;
 
 /**
  * Function watching the DOM loaded state
