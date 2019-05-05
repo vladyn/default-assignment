@@ -1,14 +1,11 @@
-import turnService from './turn-service';
+import turnService from './turnService';
 
 describe('Turn service', () => {
-  const turn = jest.fn();
+  const turn = jest.fn()
+    .mockReturnValueOnce('player-one')
+    .mockReturnValueOnce('player-two');
   beforeEach(() => {
     window.location.assign = jest.fn();
-    turn
-      .mockReturnValueOnce('player-one')
-      .mockReturnValueOnce('player-two');
-  });
-  afterEach(() => {
   });
   it('should call the turn service', () => {
     turnService();
