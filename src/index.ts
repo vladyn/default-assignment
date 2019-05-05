@@ -5,9 +5,9 @@ import './index.scss';
 import 'material-design-lite';
 
 import { channel } from './clientConnector';
-import turnService from './turn-service';
+import turnService from './turnService';
 import whoIsTheWinner from './whoIsTheWinner';
-import clickNDrop from './click-n-drop';
+import clickAndDrop from './clickAndDrop';
 import dialogPolyfill from 'dialog-polyfill';
 import resetBoard from './resetBoard';
 
@@ -72,7 +72,7 @@ document.onreadystatechange = () => {
       const evtElement = evt.srcElement || evt.target;
       const tokens = col.querySelectorAll('span').length;
       if (yourTurn && tokens < 6 && gameState !== 'ended') {
-        clickNDrop(evtElement, hostPlayerRole, yourTurn);
+        clickAndDrop(evtElement, hostPlayerRole, yourTurn);
         if (hostPlayerRole === turnService()) {
           hostPlayerAvatar.classList.add('their-turn');
           guestPlayerAvatar.classList.remove('their-turn');
@@ -176,7 +176,7 @@ channel.downstream.subscribe({
     if (data.message.type === 'turn') {
       const { index, player } = data.message;
       const evtElement = cols[index];
-      clickNDrop(evtElement, player, yourTurn);
+      clickAndDrop(evtElement, player, yourTurn);
       if (evtElement.classList.contains('board-col')) {
         whoIsTheWinner(player, index);
       }
@@ -237,7 +237,7 @@ function restoreBoard(board): void {
     const index = Number(col.toString().substring(3, 4));
     const colTokens: [] = col[1] as [];
     for (const el of colTokens) {
-      clickNDrop(cols[index], el);
+      clickAndDrop(cols[index], el);
     }
   }
   gameState = 'resumed';
