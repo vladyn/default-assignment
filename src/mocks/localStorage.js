@@ -1,4 +1,3 @@
-// TODO: Consider removing it as it's not in use
 const localStorageMock = (function () {
   let store = {};
   return {
