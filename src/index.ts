@@ -237,7 +237,7 @@ function restoreBoard(board): void {
     const index = Number(col.toString().substring(3, 4));
     const colTokens: [] = col[1] as [];
     for (const el of colTokens) {
-      clickAndDrop(cols[index], el);
+      clickAndDrop(cols[index], el, yourTurn);
     }
   }
   gameState = 'resumed';

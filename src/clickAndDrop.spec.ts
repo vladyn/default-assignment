@@ -32,6 +32,7 @@ describe('service creates and appends an element to the board on Click', () => {
       .toEqual('<span class="flc-game-piece player-two"></span>');
   });
   it('should not prepend more than six tokens to the board', () => {
+    yourTurn = false;
     const spans = [];
     const spanNum = 5;
     for (let i = 0; i <= spanNum; i++) {
@@ -49,6 +50,6 @@ describe('service creates and appends an element to the board on Click', () => {
     yourTurn = false;
     clickAndDrop(col, player, yourTurn);
     expect(col.innerHTML)
-      .toEqual('');
+      .toEqual('<span class="flc-game-piece player-two"></span>');
   });
 });

@@ -54,8 +54,8 @@ function whoIsTheWinner(player: string, index: number): void {
               pronounceWinner(currElement, winners.slice(0, winnerLength));
             })
             .then(() => {
-              const some = Object.entries(drops).sort().flat(2);
-              some.length === 49 ? pronounceWinner() : null;
+              const boardState = Object.entries(drops).sort().flat(2);
+              boardState.length === 49 ? pronounceWinner() : null;
               ({ counter,  winners, drops } = resetCounters());
             }, () => {
               const currElement = cols[index].querySelector('span');
