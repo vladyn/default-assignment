@@ -29,7 +29,7 @@
   },
   "devDependencies": {
     "@types/core-js": "^2.5.0",
-    "@types/jest": "^24.0.12",
+    "@types/jest": "^24.0.13",
     "@types/node": "7.0.14",
     "@types/websocket": "0.0.39",
     "core-js": "^3.0.1",
