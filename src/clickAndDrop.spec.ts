@@ -23,6 +23,7 @@ describe('service creates and appends an element to the board on Click', () => {
     clickAndDrop(col, player, yourTurn);
     clickAndDrop(col, player, yourTurn);
     expect(col.innerHTML)
+    // tslint:disable-next-line:max-line-length
       .toEqual('<span class="flc-game-piece player-one"></span><span class="flc-game-piece player-one"></span>');
   });
   it('should prepend third token with a different player name to the board', () => {
@@ -44,6 +45,7 @@ describe('service creates and appends an element to the board on Click', () => {
     });
     clickAndDrop(col, player, yourTurn);
     expect(col.innerHTML)
+    // tslint:disable-next-line:max-line-length
       .toEqual('<span class="flc-game-piece player-two"></span><span class="flc-game-piece player-two"></span><span class="flc-game-piece player-two"></span><span class="flc-game-piece player-two"></span><span class="flc-game-piece player-two"></span><span class="flc-game-piece player-two"></span>');
   });
   it('should not prepend a token to the board when it\'s not your turn', () => {

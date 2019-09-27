@@ -16,7 +16,8 @@ describe('Check the array length and returns boolean', () => {
     return traverseAir(winnerArray)
       .then((res) => {
         expect(res).toBeInstanceOf(Object);
-        expect(res).toEqual({ arrayContext: ['player-one', 'player-one', 'player-one', 'player-one'] });
+        const contextArray = ['player-one', 'player-one', 'player-one', 'player-one'];
+        expect(res).toEqual({ arrayContext: contextArray });
       });
   });
   it('should reject with a direction for the next traverse', () => {

@@ -1,12 +1,16 @@
 {
-  "compilerOptions": {
-    "outDir": "./dist/",
-    "noImplicitAny": false,
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "target": "es2018",
-    "allowJs": false,
-    "allowSyntheticDefaultImports": true,
-    "lib": ["dom", "es2018", "esnext.array"]
+  "compilerOptions":{
+    "outDir":".\/dist\/",
+    "noImplicitAny":false,
+    "module":"commonjs",
+    "moduleResolution":"node",
+    "target":"es2018",
+    "allowJs":false,
+    "allowSyntheticDefaultImports":true,
+    "lib":[
+      "dom",
+      "es2018",
+      "esnext.array"
+    ]
   }
 }
