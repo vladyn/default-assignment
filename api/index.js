@@ -97,6 +97,7 @@ WS_SERVER.on('request', request => {
         const { message, channelName, meta = {} } = JSON.parse(data.utf8Data);
 
         console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' connected.');
+        console.table(meta);
         if (isJoinChannelEvent(message)) {
           let { error } = joinChannel(message, connection);
           if (error) {

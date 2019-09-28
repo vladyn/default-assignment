@@ -13,6 +13,8 @@ import resetBoard from './resetBoard';
 
 const playerName = localStorage.getItem('username');
 const playerGender = localStorage.getItem('gender');
+let localBoard: string | null;
+let remoteBoard: string | null;
 let dialog: HTMLDialogElement;
 let cols: NodeListOf<Element>;
 let guestPlayerStatus: HTMLUnknownElement;
@@ -38,7 +40,7 @@ playerName === null ? window.location.assign(url) : null;
 document.onreadystatechange = () => {
   if (document.readyState === 'complete') {
     dialog = document.querySelector('dialog') as any;
-    if (! dialog.showModal) {
+    if (!dialog.showModal) {
       dialogPolyfill.registerDialog(dialog);
     }
     dialog.querySelector('.close').addEventListener('click', () => {
@@ -92,6 +94,8 @@ document.onreadystatechange = () => {
 
 channel.downstream.subscribe({
   next: ({ data }) => {
+    localBoard = localStorage.getItem('board');
+    remoteBoard = data.meta.board;
     if (data.channel.size > 2) {
       console.warn(`Game is limited to two players only.
       You have ${data.channel.size} players connected`);
@@ -136,14 +140,7 @@ channel.downstream.subscribe({
         resetBoard();
         dialog.close();
       }
-
-      if (localStorage.getItem('board') !== null) {
-        const retrievedBoard = localStorage.getItem('board');
-        restoreBoard(JSON.parse(retrievedBoard));
-        gameState = 'resumed';
-      } else {
-        gameState = 'ready';
-      }
+      gameState = compareBoards(localBoard, remoteBoard);
       channel.send('amigo!');
     }
 
@@ -152,13 +149,7 @@ channel.downstream.subscribe({
       guestPlayerName.textContent = data.meta.name;
       toggleAvatar();
       guestPlayerStatus.textContent = '(Online)';
-      if (localStorage.getItem('board') !== null) {
-        const retrievedBoard = localStorage.getItem('board');
-        restoreBoard(JSON.parse(retrievedBoard));
-        gameState = 'resumed';
-      } else {
-        gameState = 'ready';
-      }
+      gameState = compareBoards(localBoard, remoteBoard);
     }
 
     if (data.message === 'Venga!') {
@@ -250,6 +241,19 @@ function toggleAvatar(): void {
     guestPlayerAvatar.classList.add('player-one')
     :
     guestPlayerAvatar.classList.add('player-two');
+}
+
+function compareBoards(local, remote):'resumed' | 'ready' {
+  let state: 'resumed' | 'ready';
+  if (local !== null && local === remote) {
+    restoreBoard(JSON.parse(localBoard));
+    state = 'resumed';
+  } else {
+    resetBoard();
+    localStorage.removeItem('board');
+    state = 'ready';
+  }
+  return state;
 }
 
 export function turnCircling(turn: 'yours' | 'theirs' | 'ends'): void {
