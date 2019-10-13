@@ -14,7 +14,7 @@ document.onreadystatechange = () => {
     const name = document.getElementById('player_name') as HTMLInputElement;
     // Add a close functionality to the Cancel button.
     document.getElementById('later').addEventListener('click', () => {
-      window.location.href = '/doc.html';
+      window.location.assign('/doc.html');
     });
     document.getElementById('play').addEventListener('click', () => {
       addDetail({ name: 'username', value: name.value })
@@ -25,7 +25,7 @@ document.onreadystatechange = () => {
             .then(() => {
               console.info(localStorage.getItem('username'));
               console.info(localStorage.getItem('gender'));
-              window.location.href = 'http://localhost:8080/';
+              window.location.assign('http://localhost:8080/');
             });
         });
     });

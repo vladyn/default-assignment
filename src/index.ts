@@ -99,7 +99,7 @@ channel.downstream.subscribe({
     if (data.channel.size > 2) {
       console.warn(`Game is limited to two players only.
       You have ${data.channel.size} players connected`);
-      window.location.href = '/403';
+      window.location.assign('/403');
     }
 
     if (data.error) {

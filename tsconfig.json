@@ -11,6 +11,12 @@
       "dom",
       "es2018",
       "esnext.array"
+    ],
+    "types": [
+      "jest"
+    ],
+    "typeRoots": [
+      "./node_modules/@types"
     ]
   }
 }
