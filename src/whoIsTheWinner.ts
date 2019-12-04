@@ -213,6 +213,7 @@ const traverseBullRight = (currentArray: [], index: number) => {
 const traverseBearLeft = (currentArray: [], index: number) => {
   return traverseBears(currentArray, index, 'left');
 };
+
 const traverseBearRight = (currentArray: [], index: number) => {
   return traverseBears(currentArray, index, 'right');
 };

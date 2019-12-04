@@ -38,6 +38,7 @@ const leaveChannel = (channelName, connection) => {
     if (error) {
       return connection.send(getError(channelName, error));
     }
+    connection.send({message: {type: LEAVE_CHANNEL}});
     channel.connections.delete(connection);
     if (channel.connections.size === 0) {
       CHANNELS.delete(channel);
@@ -98,6 +99,8 @@ WS_SERVER.on('request', request => {
 
         console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' connected.');
         console.table(meta);
+        console.table(data);
+
         if (isJoinChannelEvent(message)) {
           let { error } = joinChannel(message, connection);
           if (error) {
@@ -106,6 +109,7 @@ WS_SERVER.on('request', request => {
         }
 
         if (isLeaveChannelEvent(message)) {
+          console.log('it\'s a leaving channel message');
           leaveChannel(channelName, connection);
         }
 
@@ -125,8 +129,11 @@ WS_SERVER.on('request', request => {
             )));
     });
 
-    connection.on('close', () => {
-        console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
+    connection.on('close', (data) => {
+      leaveChannel('ch1', connection);
+      connection.send({message: {type: LEAVE_CHANNEL, channelName: 'ch1', meta: { message: 'left' }}});
+      console.log(`Connection closed with the following data: ${data}`);
+      console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
         leaveAllChannels(connection);
     });
 });

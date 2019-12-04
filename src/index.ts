@@ -94,6 +94,7 @@ document.onreadystatechange = () => {
 
 channel.downstream.subscribe({
   next: ({ data }) => {
+    console.log(data); // TODO: Remove
     localBoard = localStorage.getItem('board');
     remoteBoard = data.meta.board;
     if (data.channel.size > 2) {
@@ -118,6 +119,7 @@ channel.downstream.subscribe({
     }
 
     if (data.message.type === 'LEAVE_CHANNEL') {
+      channel.leave();
       // TODO: inspect this
       document.onreadystatechange = (event: any) => {
         event.target.readyState === 'interactive' ? joinBtn.disabled = true : null;
@@ -191,7 +193,9 @@ channel.downstream.subscribe({
   },
   error: err => console.error('# An error was spawned:', err),
   complete: () => {
+    channel.leave();
     console.info('# Complete');
+    // TODO: Yoo can use this block here for handling the left opponent
   }
 });
 
