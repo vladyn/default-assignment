@@ -3,7 +3,7 @@ import resetBoard from './resetBoard';
 let before;
 let after;
 
-describe('Reseting game board after a winner or draw move', () => {
+describe('Resenting game board after a winner or draw move', () => {
   beforeEach(() => {
     before = `
     <span id="hostPlayerAvatar" class="flc-game-avatar player-one winner"></span>

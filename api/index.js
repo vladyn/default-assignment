@@ -82,6 +82,7 @@ WS_SERVER.on('request', request => {
         return;
     }
     if (WS_SERVER.connections.length > 1) {
+      // TODO: Think about notifying the front-end here, that more than one is not allowed
         request.reject('403', 'Game is allowed for maximum 2 players');
         console.error('Game is allowed for maximum 2 players');
         return;
@@ -129,12 +130,25 @@ WS_SERVER.on('request', request => {
             )));
     });
 
-    connection.on('close', (data) => {
-      leaveChannel('ch1', connection);
-      connection.send({message: {type: LEAVE_CHANNEL, channelName: 'ch1', meta: { message: 'left' }}});
-      console.log(`Connection closed with the following data: ${data}`);
+    connection.on('close', (reason) => {
+      CHANNELS.forEach(channel => {
+        Array.from(channel.connections)
+          .filter(con => con !== connection)
+          .forEach(con => con.send(JSON.stringify({
+              message: {
+                type: LEAVE_CHANNEL,
+                reason
+              },
+            meta: connection.remoteAddress,
+              channel: {
+                name: channel.name
+              }
+            }
+          )));
+        leaveChannel(channel.name, connection);
+      });
+      console.log(`Connection closed with the following data: ${reason}`);
       console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
-        leaveAllChannels(connection);
     });
 });
 

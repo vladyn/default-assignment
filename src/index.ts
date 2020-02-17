@@ -94,7 +94,9 @@ document.onreadystatechange = () => {
 
 channel.downstream.subscribe({
   next: ({ data }) => {
-    console.log(data); // TODO: Remove
+    console.groupCollapsed(`Receiving data in ${channel}`);
+    console.dir(data);
+    console.groupEnd();
     localBoard = localStorage.getItem('board');
     remoteBoard = data.meta.board;
     if (data.channel.size > 2) {
@@ -119,14 +121,16 @@ channel.downstream.subscribe({
     }
 
     if (data.message.type === 'LEAVE_CHANNEL') {
-      channel.leave();
-      // TODO: inspect this
+
       document.onreadystatechange = (event: any) => {
         event.target.readyState === 'interactive' ? joinBtn.disabled = true : null;
       };
       guestPlayerStatus.textContent = '(Offline)';
       joinBtn.classList.add('mdl-button--disabled');
       joinBtn.disabled = true;
+      modalTitle.textContent = 'Your opponent has left.';
+      dialog.showModal();
+      gameState = 'resumed';
     }
 
     if (data.message === 'Hola!') {
