@@ -10,6 +10,7 @@ const resetBoard = () => {
   });
   hostPlayerAvatar.classList.remove(winnerClass);
   guestPlayerAvatar.classList.remove(winnerClass);
+  localStorage.removeItem('board');
 };
 
 export default resetBoard;

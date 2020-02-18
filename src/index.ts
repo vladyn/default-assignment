@@ -111,13 +111,14 @@ channel.downstream.subscribe({
     }
 
     if (data.message.type === 'JOIN_CHANNEL') {
-      // TODO: inspect this
-      document.onreadystatechange = (event: any) => {
-        event.target.readyState === 'interactive' ? joinBtn.disabled = false : null;
-      };
+      guestPlayerStatus.textContent = `(${data.channel.size - 1} Player(s) ready to join)`;
+      channel.send('ping');
+    }
+
+    if (data.message === 'ping') {
+      joinBtn.disabled = false;
       joinBtn.classList.remove('mdl-button--disabled');
       joinBtn.disabled = false;
-      guestPlayerStatus.textContent = `(${data.channel.size - 1} Player(s) ready to join)`;
     }
 
     if (data.message.type === 'LEAVE_CHANNEL') {
@@ -142,11 +143,8 @@ channel.downstream.subscribe({
       guestPlayerName.textContent = data.meta.name;
       toggleAvatar();
       guestPlayerStatus.textContent = '(Online)';
-      if (dialog.open) {
-        resetBoard();
-        dialog.close();
-      }
       gameState = compareBoards(localBoard, remoteBoard);
+      prepareBoards(gameState);
       channel.send('amigo!');
     }
 
@@ -156,6 +154,7 @@ channel.downstream.subscribe({
       toggleAvatar();
       guestPlayerStatus.textContent = '(Online)';
       gameState = compareBoards(localBoard, remoteBoard);
+      prepareBoards(gameState);
     }
 
     if (data.message === 'Venga!') {
@@ -209,12 +208,14 @@ function joinGame() {
   joinBtn.disabled = true;
   startBtn.classList.add('mdl-button--disabled');
   startBtn.disabled = true;
-  gameState = 'ready';
+  gameState = compareBoards(localBoard, remoteBoard);
+  prepareBoards(gameState);
   channel.send('Hola!');
 }
 
 function startGame() {
-  if (gameState !== 'resumed') resetBoard();
+  gameState = compareBoards(localBoard, remoteBoard);
+  prepareBoards(gameState);
   if (gameState === 'ready' || gameState === 'resumed') {
     // tslint:disable-next-line:max-line-length
     hostPlayerRole = hostPlayerAvatar.classList.contains('player-one') ? 'player-one' : 'player-two';
@@ -251,17 +252,16 @@ function toggleAvatar(): void {
     guestPlayerAvatar.classList.add('player-two');
 }
 
-function compareBoards(local, remote):'resumed' | 'ready' {
-  let state: 'resumed' | 'ready';
-  if (local !== null && local === remote) {
+function compareBoards(local, remote) : 'resumed' | 'ready' {
+  return local !== null && local === remote ? 'resumed' : 'ready';
+}
+
+function prepareBoards(state: 'resumed' | 'ready') {
+  if (state === 'resumed') {
     restoreBoard(JSON.parse(localBoard));
-    state = 'resumed';
-  } else {
+  } else if (state === 'ready') {
     resetBoard();
-    localStorage.removeItem('board');
-    state = 'ready';
   }
-  return state;
 }
 
 export function turnCircling(turn: 'yours' | 'theirs' | 'ends'): void {
