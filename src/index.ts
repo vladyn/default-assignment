@@ -38,6 +38,7 @@ playerName === null ? window.location.assign(url) : null;
  */
 
 document.onreadystatechange = () => {
+  console.log(document.readyState);
   if (document.readyState === 'complete') {
     dialog = document.querySelector('dialog') as any;
     if (!dialog.showModal) {
@@ -99,6 +100,7 @@ channel.downstream.subscribe({
     console.groupEnd();
     localBoard = localStorage.getItem('board');
     remoteBoard = data.meta.board;
+
     if (data.channel.size > 2) {
       console.warn(`Game is limited to two players only.
       You have ${data.channel.size} players connected`);
@@ -119,19 +121,16 @@ channel.downstream.subscribe({
       joinBtn.disabled = false;
       joinBtn.classList.remove('mdl-button--disabled');
       joinBtn.disabled = false;
+      guestPlayerStatus.textContent = '(Online)';
     }
 
     if (data.message.type === 'LEAVE_CHANNEL') {
-
-      document.onreadystatechange = (event: any) => {
-        event.target.readyState === 'interactive' ? joinBtn.disabled = true : null;
-      };
       guestPlayerStatus.textContent = '(Offline)';
-      joinBtn.classList.add('mdl-button--disabled');
-      joinBtn.disabled = true;
-      modalTitle.textContent = 'Your opponent has left.';
-      dialog.showModal();
-      gameState = 'resumed';
+      guestPlayerAvatar.classList.contains('player-one')
+        ?
+      guestPlayerAvatar.classList.remove('player-one')
+        :
+      guestPlayerAvatar.classList.remove('player-two');
     }
 
     if (data.message === 'Hola!') {
